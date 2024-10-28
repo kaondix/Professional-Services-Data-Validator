@@ -22,7 +22,7 @@
 # - All available RAM on the host is for this process to use in full.
 
 function show_usage {
-  echo 'Usage: $0 -t <table-name> -c <row-count-in-table> -p <primary-key-columns-csv>'
+  echo 'Usage: $0 -t <table-name> -c <row-count-in-table> -p <primary-key-columns-csv> [-d <DVT-processes-per-vcpu>]'
 }
 
 # Constant based on internal testing.
