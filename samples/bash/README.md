@@ -15,6 +15,8 @@ In essence the script will validate the table in small enough partitions to not 
 
 ### Examples
 
+#### 1 million rows
+
 Validatate a 1m row table on a host with 4 vCPUs and > 30GB available RAM.
 ```
 $ ./auto_partition.sh -t dvt_test.tab_vol_1m -c 1000000 -p id
@@ -53,6 +55,7 @@ Notes:
 - The table was small enough to validate in a single pass but because there are 4 vCPUs available it was split into 4 partitions
 - The validation took just over 1 minute
 
+#### 20 million rows
 
 Validatate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Request two DVT threads per vCPU.
 ```
@@ -131,3 +134,83 @@ Notes:
 - Because of low memory availability, 4GB, the table was split into 64 partitions
 - The 64 partitions will take 8 passes to be processed
 - The validation took 14 minutes
+
+#### 100 million rows
+
+Validatate a 100m row table on a host with 4 vCPUs and only 30GB available RAM, requesting two DVT threads per vCPU.
+```
+$ ./auto_partition.sh -t dvt_test.tab_vol_100m -c 100000000 -p id -d 2
+Splitting dvt_test.tab_vol_100m
+Partitions: 40
+Parallelism: 8
+Parallel passes: 5
+10/28/2024 01:49:16 PM-INFO: Writing table partition configs to directory: /tmp/auto_partition
+10/28/2024 01:49:16 PM-INFO: Success! Table partition configs written to directory: /tmp/auto_partition
+total 160
+-rw-r--r-- 1 nj 2170 Oct 28 13:49 0000.yaml
+-rw-r--r-- 1 nj 2206 Oct 28 13:49 0001.yaml
+...
+-rw-r--r-- 1 nj 2210 Oct 28 13:49 0038.yaml
+-rw-r--r-- 1 nj 2174 Oct 28 13:49 0039.yaml
+Pass: 1
+============
+Submitting partition: 0
+Submitting partition: 1
+Submitting partition: 2
+Submitting partition: 3
+Submitting partition: 4
+Submitting partition: 5
+Submitting partition: 6
+Submitting partition: 7
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0001.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0004.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0005.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0003.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0000.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0007.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0006.yaml
+10/28/2024 01:49:22 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0002.yaml
+10/28/2024 02:12:34 PM-INFO: Results written to BigQuery, run id: aabfd5e7-a2c0-4efd-9365-3b5cc163ff88
+10/28/2024 02:12:36 PM-INFO: Results written to BigQuery, run id: d5f3aada-33ec-467b-bc3a-4f686b37e3a7
+10/28/2024 02:12:53 PM-INFO: Results written to BigQuery, run id: 0e8a68a9-db93-4161-8166-e185113f9e85
+10/28/2024 02:18:58 PM-INFO: Results written to BigQuery, run id: d4803ab8-6ed9-4a73-b97e-04801a9b6bc3
+10/28/2024 02:19:01 PM-INFO: Results written to BigQuery, run id: 2d47a5b1-b7f0-4d0e-ad23-b33e9ad8fcda
+10/28/2024 02:19:19 PM-INFO: Results written to BigQuery, run id: eba15952-a798-49e3-b02d-7183c9785d0d
+10/28/2024 02:19:21 PM-INFO: Results written to BigQuery, run id: 6b13b620-a01d-4fca-9acb-d0d33e87eb0c
+10/28/2024 02:25:25 PM-INFO: Results written to BigQuery, run id: af2074e8-1e78-4f1e-af2b-080446369ba7
+Pass: 2
+============
+...
+Pass: 5
+============
+Submitting partition: 32
+Submitting partition: 33
+Submitting partition: 34
+Submitting partition: 35
+Submitting partition: 36
+Submitting partition: 37
+Submitting partition: 38
+Submitting partition: 39
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0036.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0034.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0039.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0033.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0038.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0037.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0032.yaml
+10/28/2024 03:19:06 PM-INFO: Currently running the validation for YAML file: /tmp/auto_partition/dvt_test.tab_vol_100m/0035.yaml
+10/28/2024 03:35:41 PM-INFO: Results written to BigQuery, run id: eac014c6-028a-4372-a1e1-2c2331a8ce62
+10/28/2024 03:36:04 PM-INFO: Results written to BigQuery, run id: 0810b1ca-b618-4a20-bc9a-394aa0060014
+10/28/2024 03:36:15 PM-INFO: Results written to BigQuery, run id: e75c35d4-ba9e-4986-af17-8b9da26c25aa
+10/28/2024 03:36:16 PM-INFO: Results written to BigQuery, run id: a2f8a549-c51d-45d0-9571-96a882464926
+10/28/2024 03:36:18 PM-INFO: Results written to BigQuery, run id: bbf89093-4d07-47c0-91a7-4f87823e5179
+10/28/2024 03:36:18 PM-INFO: Results written to BigQuery, run id: c44ab3f2-6413-4629-bbc4-a60ab67a78b3
+10/28/2024 03:36:19 PM-INFO: Results written to BigQuery, run id: f9487d83-3f3c-4bd2-aed1-1803035903f6
+10/28/2024 03:36:22 PM-INFO: Results written to BigQuery, run id: b1db8834-9669-4112-8e87-67668d8ebf2d
+```
+
+Notes:
+- We requested 2 DVT proceses per vCPU and therefore run 8 DVT partitions concurrently
+- Because there was plenty of memory available, 30GB, the table was split into 40 partitions
+- The 40 partitions will take 5 passes to be processed
+- Validation of the 100m row table took 1 hour 45 minutes (your mileage may vary)
