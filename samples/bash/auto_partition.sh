@@ -108,8 +108,11 @@ if [[ $? != 0 ]];then
 fi
 
 YAML_TABLE_DIR="${YAML_DIR}/${TABLE_NAME}"
-ls -l ${YAML_TABLE_DIR}
-# TODO stat the directory and check there are files.
+ls -l ${YAML_TABLE_DIR}/*.yaml
+if [[ $? != 0 ]];then
+  echo "No YAML configs generated"
+  exit 1
+fi
 
 JOB_COUNT=0
 for i in $(seq 1 1 ${PARALLEL_PASSES});do
