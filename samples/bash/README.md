@@ -214,3 +214,4 @@ Notes:
 - Because there was plenty of memory available, 30GB, the table was split into 40 partitions
 - The 40 partitions will take 5 passes to be processed
 - Validation of the 100m row table took 1 hour 45 minutes (your mileage may vary)
+- The auto_partition.sh script stored all results in BigQuery (100m entries) which takes some time. We could use --filter-status=fail for a faster validation
