@@ -13,6 +13,13 @@ It makes the following assumptions:
 
 In essence the script will validate the table in small enough partitions to not exceed available memory and in enough parallel streams to max out avalable vCPUs.
 
+To use the script please edit the following variables:
+```
+SRC="ora"
+TRG="pg"
+BQRH="--bq-result-handler=some-project.dvt_dataset.results"
+```
+
 ### Examples
 
 #### 1 million rows
