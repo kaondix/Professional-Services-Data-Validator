@@ -20,7 +20,8 @@
 # - All available RAM on the host is for this process to use in full.
 
 function show_usage {
-  echo 'Usage: $0 -t <table-name> -c <row-count-in-table> -p <primary-key-columns-csv> [-d <DVT-processes-per-vcpu>]'
+  echo 'Usage: $0 -t <table-name> -c <row-count-in-table> -i <primary-key-columns-csv> [-p <parallelism>]'
+  echo '       parallelism defaults to local vCPU count'
 }
 
 # Constant based on internal testing.
@@ -28,9 +29,9 @@ function show_usage {
 MB_PER_MILLION_ROWS=1500
 
 # Connection names
-SRC="ora23"
+SRC="ora"
 TRG="pg"
-BQRH="--bq-result-handler=db-black-belts-playground-01.neiljohnson_dvt_test.results"
+BQRH="--bq-result-handler=some-project.dvt_dataset.results"
 
 OPTIND=1
 
@@ -38,9 +39,9 @@ OPTIND=1
 TABLE_NAME=""
 TABLE_ROW_COUNT=0
 PRIMARY_KEYS=""
-DVTS_PER_VCPU=1
+PARALLELISM=""
 
-while getopts "ht:c:p:d:" OPT; do
+while getopts "ht:r:i:p:" OPT; do
   case "$OPT" in
     h)
       show_usage
@@ -52,11 +53,11 @@ while getopts "ht:c:p:d:" OPT; do
     c)
       TABLE_ROW_COUNT=$OPTARG
       ;;
-    p)
+    i)
       PRIMARY_KEYS=$OPTARG
       ;;
-    d)
-      DVTS_PER_VCPU=$OPTARG
+    p)
+      DVT-parallelism=$OPTARG
       ;;
   esac
 done
@@ -70,25 +71,26 @@ fi
 
 # Available RAM on the VM.
 AVAILABLE_MB=$(free -m|grep "Mem:"|awk '{print $NF}')
-VCPU=$(nproc)
 
 # How many DVT processes can be executed concurrently.
-PERMITTED_THREADS=$(python3 -c "print(${VCPU}*${DVTS_PER_VCPU})")
+if [[ -z "${PARALLELISM}"]];then
+  PARALLELISM=$(nproc)
+fi
 
-ROWS_PER_PARTITION=$(python3 -c "mb_per_vcpu=${AVAILABLE_MB}/${PERMITTED_THREADS};print(round(mb_per_vcpu/${MB_PER_MILLION_ROWS}*1000000))")
+ROWS_PER_PARTITION=$(python3 -c "mb_per_vcpu=${AVAILABLE_MB}/${PARALLELISM};print(round(mb_per_vcpu/${MB_PER_MILLION_ROWS}*1000000))")
 
-DVT_PARTITIONS=$(python3 -c "import math; print(${PERMITTED_THREADS} * round(math.ceil(${TABLE_ROW_COUNT}/${ROWS_PER_PARTITION}/${PERMITTED_THREADS})))")
+DVT_PARTITIONS=$(python3 -c "import math; print(${PARALLELISM} * round(math.ceil(${TABLE_ROW_COUNT}/${ROWS_PER_PARTITION}/${PARALLELISM})))")
 if [[ $? != 0 ]];then
   echo "Error calculating DVT_PARTITIONS"
   exit 1
 fi
 
 # This is the number of loop iterations required to process all partitions.
-PARALLEL_PASSES=$(python3 -c "import math; print(math.ceil(${DVT_PARTITIONS}/${PERMITTED_THREADS}))")
+PARALLEL_PASSES=$(python3 -c "import math; print(math.ceil(${DVT_PARTITIONS}/${PARALLELISM}))")
 
 echo "Splitting ${TABLE_NAME}"
 echo "Partitions: ${DVT_PARTITIONS}"
-echo "Parallelism: ${PERMITTED_THREADS}"
+echo "Parallelism: ${PARALLELISM}"
 echo "Parallel passes: ${PARALLEL_PASSES}"
 
 YAML_DIR=/tmp/auto_partition
@@ -118,7 +120,7 @@ JOB_COUNT=0
 for i in $(seq 1 1 ${PARALLEL_PASSES});do
     echo "Pass: ${i}"
     echo "============"
-    for j in $(seq 0 1 $(expr ${PERMITTED_THREADS} - 1));do
+    for j in $(seq 0 1 $(expr ${PARALLELISM} - 1));do
         echo "Submitting partition: ${JOB_COUNT}"
         JOB_COMPLETION_INDEX=${JOB_COUNT} data-validation configs run -kc -cdir ${YAML_TABLE_DIR} &
         JOB_COUNT=$(expr ${JOB_COUNT} + 1)

@@ -19,7 +19,7 @@ In essence the script will validate the table in small enough partitions to not 
 
 Validatate a 1m row table on a host with 4 vCPUs and > 30GB available RAM.
 ```
-$ ./auto_partition.sh -t dvt_test.tab_vol_1m -c 1000000 -p id
+$ ./auto_partition.sh -t dvt_test.tab_vol_1m -c 1000000 -i id
 ```
 
 Output:
@@ -57,9 +57,9 @@ Notes:
 
 #### 20 million rows
 
-Validatate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Request two DVT threads per vCPU.
+Validatate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Requesting parallelism of 8, 2 DVTs per vCPU.
 ```
-$ ./auto_partition.sh -t dvt_test.tab_vol_20m -c 20000000 -p id -d 2
+$ ./auto_partition.sh -t dvt_test.tab_vol_20m -c 20000000 -i id -p 8
 Splitting dvt_test.tab_vol_20m
 Partitions: 64
 Parallelism: 8
@@ -137,9 +137,9 @@ Notes:
 
 #### 100 million rows
 
-Validatate a 100m row table on a host with 4 vCPUs and only 30GB available RAM, requesting two DVT threads per vCPU.
+Validatate a 100m row table on a host with 4 vCPUs and only 30GB available RAM, requesting parallelism of 8, 2 DVTs per vCPU.
 ```
-$ ./auto_partition.sh -t dvt_test.tab_vol_100m -c 100000000 -p id -d 2
+$ ./auto_partition.sh -t dvt_test.tab_vol_100m -c 100000000 -i id -p 8
 Splitting dvt_test.tab_vol_100m
 Partitions: 40
 Parallelism: 8
