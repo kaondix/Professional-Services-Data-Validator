@@ -73,7 +73,7 @@ fi
 AVAILABLE_MB=$(free -m|grep "Mem:"|awk '{print $NF}')
 
 # How many DVT processes can be executed concurrently.
-if [[ -z "${PARALLELISM}"]];then
+if [[ -z "${PARALLELISM}" ]];then
   PARALLELISM=$(nproc)
 fi
 
