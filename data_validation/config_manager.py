@@ -14,6 +14,8 @@
 
 import copy
 import logging
+import string
+import random
 from typing import TYPE_CHECKING, Optional, Union, List, Dict
 
 import google.oauth2.service_account
@@ -285,10 +287,12 @@ class ConfigManager(object):
     @property
     def full_source_table(self):
         """Return string value of target table."""
-        if self.source_schema:
+        if self.source_table and self.source_schema:
             return self.source_schema + "." + self.source_table
-        else:
+        elif self.source_table:
             return self.source_table
+        else:
+            return f"custom.{''.join(random.choice(string.ascii_lowercase) for _ in range(5))}"
 
     @property
     def labels(self):
@@ -385,7 +389,7 @@ class ConfigManager(object):
 
     def get_source_ibis_calculated_table(self, depth=None):
         """Return mutated IbisTable from source
-        n: Int the depth of subquery requested"""
+        depth: Int the depth of subquery requested"""
         if self.validation_type == consts.CUSTOM_QUERY:
             table = self.get_source_ibis_table_from_query()
         else:
@@ -1069,6 +1073,27 @@ class ConfigManager(object):
 
         return order_of_operations
 
+    def _filter_columns_by_column_list(
+        self, casefold_columns: list, col_list: list, exclude_cols: bool
+    ) -> list:
+        if col_list:
+            filter_list = [_.casefold() for _ in col_list]
+            if exclude_cols:
+                # Exclude columns based on col_list if provided
+                casefold_columns = {
+                    k: v for (k, v) in casefold_columns.items() if k not in filter_list
+                }
+            else:
+                # Include columns based on col_list if provided
+                casefold_columns = {
+                    k: v for (k, v) in casefold_columns.items() if k in filter_list
+                }
+        elif exclude_cols:
+            raise ValueError(
+                "Exclude columns flag cannot be present with column list '*'"
+            )
+        return casefold_columns
+
     def build_dependent_aliases(
         self, calc_type: str, col_list=None, exclude_cols=False
     ) -> List[Dict]:
@@ -1079,36 +1104,12 @@ class ConfigManager(object):
         casefold_source_columns = {x.casefold(): str(x) for x in source_table.columns}
         casefold_target_columns = {x.casefold(): str(x) for x in target_table.columns}
 
-        if col_list:
-            casefold_col_list = [x.casefold() for x in col_list]
-            if exclude_cols:
-                # Exclude columns based on col_list if provided
-                casefold_source_columns = {
-                    k: v
-                    for (k, v) in casefold_source_columns.items()
-                    if k not in casefold_col_list
-                }
-                casefold_target_columns = {
-                    k: v
-                    for (k, v) in casefold_target_columns.items()
-                    if k not in casefold_col_list
-                }
-            else:
-                # Include columns based on col_list if provided
-                casefold_source_columns = {
-                    k: v
-                    for (k, v) in casefold_source_columns.items()
-                    if k in casefold_col_list
-                }
-                casefold_target_columns = {
-                    k: v
-                    for (k, v) in casefold_target_columns.items()
-                    if k in casefold_col_list
-                }
-        elif exclude_cols:
-            raise ValueError(
-                "Exclude columns flag cannot be present with column list '*'"
-            )
+        casefold_source_columns = self._filter_columns_by_column_list(
+            casefold_source_columns, col_list, exclude_cols
+        )
+        casefold_target_columns = self._filter_columns_by_column_list(
+            casefold_target_columns, col_list, exclude_cols
+        )
 
         column_aliases = {}
         col_names = []
@@ -1158,3 +1159,14 @@ class ConfigManager(object):
                     column_aliases[name] = i
                     col_names.append(col)
         return col_names
+
+    def build_comp_fields(self, col_list: list, exclude_cols: bool = False) -> list:
+        """This is a utility function processing comp-fields values like we do for hash/concat."""
+        source_table = self.get_source_ibis_calculated_table()
+        casefold_source_columns = {_.casefold(): str(_) for _ in source_table.columns}
+
+        casefold_source_columns = self._filter_columns_by_column_list(
+            casefold_source_columns, col_list, exclude_cols
+        )
+
+        return casefold_source_columns
