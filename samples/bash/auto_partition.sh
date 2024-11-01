@@ -41,7 +41,7 @@ TABLE_ROW_COUNT=0
 PRIMARY_KEYS=""
 PARALLELISM=""
 
-while getopts "ht:r:i:p:" OPT; do
+while getopts "ht:c:i:p:" OPT; do
   case "$OPT" in
     h)
       show_usage
