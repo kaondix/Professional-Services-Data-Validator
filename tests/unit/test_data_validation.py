@@ -29,31 +29,33 @@ from data_validation import consts
 SOURCE_TABLE_FILE_PATH = "source_table_data.json"
 TARGET_TABLE_FILE_PATH = "target_table_data.json"
 
+DUMMY_RUN_ID = "aa000000-0000-0000-0000-000000000001"
+
 SOURCE_CONN_CONFIG = {
-    "source_type": "FileSystem",
-    "table_name": "my_table",
+    consts.SOURCE_TYPE: "FileSystem",
+    consts.CONFIG_TABLE_NAME: "my_table",
     "file_path": SOURCE_TABLE_FILE_PATH,
     "file_type": "json",
 }
 
 TARGET_CONN_CONFIG = {
-    "source_type": "FileSystem",
-    "table_name": "my_table",
+    consts.SOURCE_TYPE: "FileSystem",
+    consts.CONFIG_TABLE_NAME: "my_table",
     "file_path": TARGET_TABLE_FILE_PATH,
     "file_type": "json",
 }
 
 SAMPLE_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
-    consts.CONFIG_TYPE: "Column",
+    consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_GROUPED_COLUMNS: [],
     consts.CONFIG_AGGREGATES: [
         {
@@ -77,15 +79,15 @@ SAMPLE_CONFIG = {
 
 SAMPLE_THRESHOLD_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
-    consts.CONFIG_TYPE: "Column",
+    consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_GROUPED_COLUMNS: [],
     consts.CONFIG_AGGREGATES: [
         {
@@ -110,16 +112,16 @@ SAMPLE_THRESHOLD_CONFIG = {
 # Grouped Column Row config
 SAMPLE_GC_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
     consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
     consts.CONFIG_MAX_RECURSIVE_QUERY_SIZE: 50,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_GROUPED_COLUMNS: [
         {
             consts.CONFIG_FIELD_ALIAS: "date_value",
@@ -152,16 +154,16 @@ SAMPLE_GC_CONFIG = {
 # Grouped Column Row config
 SAMPLE_MULTI_GC_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
     consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
     consts.CONFIG_MAX_RECURSIVE_QUERY_SIZE: 50,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_GROUPED_COLUMNS: [
         {
             consts.CONFIG_FIELD_ALIAS: "date_value",
@@ -199,16 +201,16 @@ SAMPLE_MULTI_GC_CONFIG = {
 
 SAMPLE_GC_CALC_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
     consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
     consts.CONFIG_MAX_RECURSIVE_QUERY_SIZE: 50,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_GROUPED_COLUMNS: [
         {
             consts.CONFIG_FIELD_ALIAS: "date_value",
@@ -297,15 +299,15 @@ SAMPLE_GC_CALC_CONFIG = {
 # Row config
 SAMPLE_ROW_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
     consts.CONFIG_TYPE: consts.ROW_VALIDATION,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_PRIMARY_KEYS: [
         {
             consts.CONFIG_FIELD_ALIAS: "id",
@@ -328,23 +330,27 @@ SAMPLE_ROW_CONFIG = {
             consts.CONFIG_CAST: None,
         },
     ],
-    consts.CONFIG_RESULT_HANDLER: None,
-    consts.CONFIG_FORMAT: "table",
+    consts.CONFIG_RESULT_HANDLER: {
+        consts.CONFIG_TYPE: "BigQuery",
+        consts.PROJECT_ID: "my-project",
+        consts.TABLE_ID: "dataset.table_name",
+    },
+    consts.CONFIG_FORMAT: "text",
     consts.CONFIG_FILTER_STATUS: None,
 }
 
 # Row config
 SAMPLE_JSON_ROW_CONFIG = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
     consts.CONFIG_TYPE: consts.ROW_VALIDATION,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_PRIMARY_KEYS: [
         {
             consts.CONFIG_FIELD_ALIAS: "pkey",
@@ -369,15 +375,15 @@ SAMPLE_JSON_ROW_CONFIG = {
 # Row validation where we only care about failures and we write them to BQ
 SAMPLE_ROW_CONFIG_BQ_FAILURES = {
     # BigQuery Specific Connection Config
-    "source_conn": SOURCE_CONN_CONFIG,
-    "target_conn": TARGET_CONN_CONFIG,
+    consts.CONFIG_SOURCE_CONN: SOURCE_CONN_CONFIG,
+    consts.CONFIG_TARGET_CONN: TARGET_CONN_CONFIG,
     # Validation Type
     consts.CONFIG_TYPE: consts.ROW_VALIDATION,
     # Configuration Required Depending on Validator Type
-    "schema_name": None,
-    "table_name": "my_table",
-    "target_schema_name": None,
-    "target_table_name": "my_table",
+    consts.CONFIG_SCHEMA_NAME: None,
+    consts.CONFIG_TABLE_NAME: "my_table",
+    consts.CONFIG_TARGET_SCHEMA_NAME: None,
+    consts.CONFIG_TARGET_TABLE_NAME: "my_table",
     consts.CONFIG_PRIMARY_KEYS: [
         {
             consts.CONFIG_FIELD_ALIAS: "id",
@@ -407,6 +413,7 @@ SAMPLE_ROW_CONFIG_BQ_FAILURES = {
     },
     consts.CONFIG_FORMAT: "text",
     consts.CONFIG_FILTER_STATUS: ["fail"],
+    consts.CONFIG_RUN_ID: DUMMY_RUN_ID,
 }
 
 JSON_DATA = """[{"col_a":1,"col_b":"a"},{"col_a":1,"col_b":"b"}]"""
@@ -698,21 +705,22 @@ def test_grouped_column_level_validation_multiple_aggregations(module_under_test
     assert validation_df["target_agg_value"].astype(float).sum() == 11
 
 
-def test_row_level_validation(module_under_test, fs):
+def test_row_level_validation(module_under_test, fs, monkeypatch):
+    # Mock the big query client
+    mock_bq_client = mock.create_autospec(bigquery.Client)
+    monkeypatch.setattr(bigquery, "Client", value=mock_bq_client)
+    # With some mocked data - source and target the same
     data = _generate_fake_data(rows=100, second_range=0)
-
     source_json_data = _get_fake_json_data(data)
     target_json_data = _get_fake_json_data(data)
-
     _create_table_file(SOURCE_TABLE_FILE_PATH, source_json_data)
     _create_table_file(TARGET_TABLE_FILE_PATH, target_json_data)
-
+    # When we validate
     client = module_under_test.DataValidation(SAMPLE_ROW_CONFIG)
     result_df = client.execute()
-
+    # Then we expect
     str_comparison_df = result_df[result_df["validation_name"] == "text_value"]
     int_comparison_df = result_df[result_df["validation_name"] == "int_value"]
-
     assert len(result_df) == 200
     assert len(str_comparison_df) == 100
     assert len(int_comparison_df) == 100
@@ -730,25 +738,39 @@ def test_fail_row_level_validation(module_under_test, fs):
     assert len(fail_df) == 5
 
 
-def test_bad_join_row_level_validation(module_under_test, fs):
+def test_bad_join_row_level_validation(module_under_test, fs, caplog, monkeypatch):
+    # Mock the big query client
+    mock_bq_client = mock.create_autospec(bigquery.Client)
+    monkeypatch.setattr(bigquery, "Client", value=mock_bq_client)
+    # With some mocked data - source and target different
     data = _generate_fake_data(rows=100, second_range=0)
     target_data = _generate_fake_data(initial_id=100, rows=1, second_range=0)
-
     source_json_data = _get_fake_json_data(data)
     target_json_data = _get_fake_json_data(target_data)
-
     _create_table_file(SOURCE_TABLE_FILE_PATH, source_json_data)
     _create_table_file(TARGET_TABLE_FILE_PATH, target_json_data)
-
+    # ... and the log level being DEBUG
+    caplog.set_level(logging.DEBUG)
+    # When we validate
     client = module_under_test.DataValidation(SAMPLE_ROW_CONFIG)
     result_df = client.execute()
-
     comparison_df = result_df[
         result_df["validation_status"] == consts.VALIDATION_STATUS_FAIL
     ]
+    # Then we expect
     # 2 validations * (100 source + 1 target)
     assert len(result_df) == 202
     assert len(comparison_df) == 202
+    # The "Results written" message happens + info about the failed data, all against a generated run_id
+    # assert len(caplog.records) == 202
+    run_id = result_df.iloc[0]["run_id"]
+    assert run_id != DUMMY_RUN_ID
+    assert caplog.records[0].message == f"Results written to BigQuery, run id: {run_id}"
+    assert (
+        "validation_name validation_type source_table_name source_column_name source_agg_value target_agg_value pct_difference validation_status"
+        in caplog.records[1].message
+    )
+    assert f"fail {run_id}" in caplog.records[1].message
 
 
 def test_no_console_data_shown_for_validation_with_result_written_to_bq_in_info_mode(
@@ -777,8 +799,10 @@ def test_no_console_data_shown_for_validation_with_result_written_to_bq_in_info_
     # Only the "Results written" message happens
     # Important because the results could include sensitive data, which some users need to exclude
     assert len(caplog.records) == 1
-    run_id = result_df.iloc[0]["run_id"]
-    assert caplog.records[0].message == f"Results written to BigQuery, run id: {run_id}"
+    assert (
+        caplog.records[0].message
+        == f"Results written to BigQuery, run id: {DUMMY_RUN_ID}"
+    )
 
 
 def test_no_console_data_shown_for_matching_validation_with_result_written_to_bq_in_info_mode(
@@ -831,13 +855,15 @@ def test_console_data_shown_for_validation_with_result_written_to_bq_in_debug_mo
     assert len(fail_df) == 2
     # The "Results written" message happens + info about the failed data
     assert len(caplog.records) == 2
-    run_id = result_df.iloc[0]["run_id"]
-    assert caplog.records[0].message == f"Results written to BigQuery, run id: {run_id}"
+    assert (
+        caplog.records[0].message
+        == f"Results written to BigQuery, run id: {DUMMY_RUN_ID}"
+    )
     assert (
         "validation_name validation_type source_table_name source_column_name source_agg_value target_agg_value pct_difference validation_status"
         in caplog.records[1].message
     )
-    assert f"fail {run_id}" in caplog.records[1].message
+    assert f"fail {DUMMY_RUN_ID}" in caplog.records[1].message
 
 
 def test_console_data_shown_for_matching_validation_with_result_written_to_bq_in_debug_mode(

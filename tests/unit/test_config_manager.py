@@ -15,7 +15,6 @@
 import copy
 import pytest
 from unittest import mock
-
 import ibis.expr.datatypes as dt
 
 from data_validation import consts
@@ -60,6 +59,7 @@ SAMPLE_ROW_CONFIG = {
     consts.CONFIG_THRESHOLD: 0.0,
     consts.CONFIG_PRIMARY_KEYS: "id",
     consts.CONFIG_CALCULATED_FIELDS: ["name", "station_id"],
+    consts.CONFIG_RUN_ID: "aa000000-0000-0000-0000-000000000001",
 }
 
 SAMPLE_ROW_CONFIG_DEP_ALIASES = {
@@ -594,3 +594,17 @@ def test_build_dependent_aliases_exception(module_under_test):
         str(excinfo.value)
         == "Exclude columns flag cannot be present with column list '*'"
     )
+
+
+def test_get_correct_run_id(module_under_test):
+    config_manager = module_under_test.ConfigManager(
+        SAMPLE_ROW_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+    )
+    assert config_manager.run_id == "aa000000-0000-0000-0000-000000000001"
+
+
+def test_get_none_run_id(module_under_test):
+    config_manager = module_under_test.ConfigManager(
+        SAMPLE_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+    )
+    assert config_manager.run_id is None
