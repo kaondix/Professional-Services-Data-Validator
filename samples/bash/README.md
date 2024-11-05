@@ -24,7 +24,7 @@ BQRH="--bq-result-handler=some-project.dvt_dataset.results"
 
 #### 1 million rows
 
-Validatate a 1m row table on a host with 4 vCPUs and > 30GB available RAM.
+Validate a 1m row table on a host with 4 vCPUs and > 30GB available RAM.
 ```
 $ ./auto_partition.sh -t dvt_test.tab_vol_1m -c 1000000 -i id
 ```
