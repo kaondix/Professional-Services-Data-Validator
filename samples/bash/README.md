@@ -11,7 +11,7 @@ It makes the following assumptions:
 - All local CPU resources are for this process to use in full.
 - All available RAM on the host is for this process to use in full.
 
-In essence the script will validate the table in small enough partitions to not exceed available memory and in enough parallel streams to max out avalable vCPUs.
+In essence the script will validate the table in small enough partitions to not exceed available memory and in enough parallel streams to max out available vCPUs.
 
 To use the script please edit the following variables:
 ```
