@@ -994,7 +994,7 @@ def _add_common_arguments(
         "--run-id",
         "-rid",
         default=None,
-        help="Set a string for the run_id, if None is input then an randomly generated UUID will be used, which is the default behaviour",
+        help="Set a string for the run_id, if None is input then a randomly generated UUID will be used, which is the default behaviour",
     )
 
 
