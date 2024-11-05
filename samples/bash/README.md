@@ -137,7 +137,7 @@ Submitting partition: 63
 ```
 
 Notes:
-- We requested 2 DVT proceses per vCPU and therefore run 8 DVT partitions concurrently
+- We requested 2 DVT processes per vCPU and therefore it ran 8 DVT partitions concurrently
 - Because of low memory availability, 4GB, the table was split into 64 partitions
 - The 64 partitions will take 8 passes to be processed
 - The validation took 14 minutes
