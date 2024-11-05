@@ -2,7 +2,7 @@
 
 ## auto_partition.sh
 
-This script will generate-partitions and then execute the partitions based on the resources of the local VM and the size of the table being validated.
+This script will execute DVT's [generate-table-partitions](https://github.com/GoogleCloudPlatform/professional-services-data-validator?tab=readme-ov-file#generate-partitions-for-large-row-validations) feature and then execute the partitions based on the resources of the local VM and the size of the table being validated. This approach is an alternative to the [main options to scale DVT usage](https://github.com/GoogleCloudPlatform/professional-services-data-validator?tab=readme-ov-file#scaling-dvt).
 
 It makes the following assumptions:
 
