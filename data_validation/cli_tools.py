@@ -1482,6 +1482,7 @@ def get_pre_build_configs(args: Namespace, validate_cmd: str) -> List[Dict]:
             consts.CONFIG_CASE_INSENSITIVE_MATCH: getattr(args, consts.CONFIG_CASE_INSENSITIVE_MATCH, False),
             consts.CONFIG_ROW_CONCAT: getattr(args, consts.CONFIG_ROW_CONCAT, None),
             consts.CONFIG_ROW_HASH: getattr(args, consts.CONFIG_ROW_HASH, None),
+            consts.CONFIG_RUN_ID: getattr(args, consts.CONFIG_RUN_ID, None),
             "verbose": args.verbose,
         }
         if (
