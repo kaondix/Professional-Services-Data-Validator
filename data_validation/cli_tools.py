@@ -990,6 +990,12 @@ def _add_common_arguments(
         # TODO: update if we start to support other statuses
         help="Comma separated list of statuses to filter the validation results. Supported statuses are (success, fail). If no list is provided, all statuses are returned",
     )
+    optional_arguments.add_argument(
+        "--run-id",
+        "-rid",
+        default=None,
+        help="Set a string for the run_id, if None is input then an randomly generated UUID will be used, which is the default behaviour",
+    )
 
 
 def _check_positive(value: int) -> int:
