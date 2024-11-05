@@ -600,7 +600,7 @@ def test_get_correct_run_id(module_under_test):
     config_manager = module_under_test.ConfigManager(
         SAMPLE_ROW_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
     )
-    assert config_manager.run_id == "aa000000-0000-0000-0000-000000000001"
+    assert config_manager.run_id == SAMPLE_ROW_CONFIG[consts.CONFIG_RUN_ID]
 
 
 def test_get_none_run_id(module_under_test):

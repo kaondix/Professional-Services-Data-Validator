@@ -1478,8 +1478,12 @@ def get_pre_build_configs(args: Namespace, validate_cmd: str) -> List[Dict]:
             "result_handler_config": result_handler_config,
             "filter_config": filter_config,
             consts.CONFIG_FILTER_STATUS: filter_status,
-            consts.CONFIG_TRIM_STRING_PKS: getattr(args, consts.CONFIG_TRIM_STRING_PKS, False),
-            consts.CONFIG_CASE_INSENSITIVE_MATCH: getattr(args, consts.CONFIG_CASE_INSENSITIVE_MATCH, False),
+            consts.CONFIG_TRIM_STRING_PKS: getattr(
+                args, consts.CONFIG_TRIM_STRING_PKS, False
+            ),
+            consts.CONFIG_CASE_INSENSITIVE_MATCH: getattr(
+                args, consts.CONFIG_CASE_INSENSITIVE_MATCH, False
+            ),
             consts.CONFIG_ROW_CONCAT: getattr(args, consts.CONFIG_ROW_CONCAT, None),
             consts.CONFIG_ROW_HASH: getattr(args, consts.CONFIG_ROW_HASH, None),
             consts.CONFIG_RUN_ID: getattr(args, consts.CONFIG_RUN_ID, None),
