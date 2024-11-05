@@ -64,7 +64,7 @@ Notes:
 
 #### 20 million rows
 
-Validatate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Requesting parallelism of 8, 2 DVTs per vCPU.
+Validate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Requesting parallelism of 8, 2 DVT processes per vCPU.
 ```
 $ ./auto_partition.sh -t dvt_test.tab_vol_20m -c 20000000 -i id -p 8
 Splitting dvt_test.tab_vol_20m
