@@ -1413,8 +1413,8 @@ def get_pre_build_configs(args: Namespace, validate_cmd: str) -> List[Dict]:
         result_handler_config = None
 
     # Set filter_config and threshold. Not supported in case of schema validation
-    filter_config = getattr(args, "filters", [])
-    threshold = getattr(args, "threshold", 0.0)
+    filter_config = getattr(args, consts.CONFIG_FILTERS, [])
+    threshold = getattr(args, consts.CONFIG_THRESHOLD, 0.0)
 
     # Get labels
     if args.labels is None:
@@ -1431,8 +1431,8 @@ def get_pre_build_configs(args: Namespace, validate_cmd: str) -> List[Dict]:
     format = args.format if args.format else "table"
 
     # Get random row arguments. Only in row validations these attributes can be present.
-    use_random_rows = getattr(args, "use_random_row", False)
-    random_row_batch_size = getattr(args, "random_row_batch_size", None)
+    use_random_rows = getattr(args, consts.CONFIG_USE_RANDOM_ROWS, False)
+    random_row_batch_size = getattr(args, consts.CONFIG_RANDOM_ROW_BATCH_SIZE, None)
 
     # Get table list. Not supported in case of custom query validation
     is_filesystem = source_client._source_type == "FileSystem"
@@ -1465,21 +1465,21 @@ def get_pre_build_configs(args: Namespace, validate_cmd: str) -> List[Dict]:
     for table_obj in tables_list:
         pre_build_configs = {
             "config_type": config_type,
-            "source_conn_name": args.source_conn,
-            "target_conn_name": args.target_conn,
+            consts.CONFIG_SOURCE_CONN_NAME: args.source_conn,
+            consts.CONFIG_TARGET_CONN_NAME: args.target_conn,
             "table_obj": table_obj,
-            "labels": labels,
-            "threshold": threshold,
-            "format": format,
-            "use_random_rows": use_random_rows,
-            "random_row_batch_size": random_row_batch_size,
+            consts.CONFIG_LABELS: labels,
+            consts.CONFIG_THRESHOLD: threshold,
+            consts.CONFIG_FORMAT: format,
+            consts.CONFIG_USE_RANDOM_ROWS: use_random_rows,
+            consts.CONFIG_RANDOM_ROW_BATCH_SIZE: random_row_batch_size,
             "source_client": source_client,
             "target_client": target_client,
             "result_handler_config": result_handler_config,
             "filter_config": filter_config,
-            "filter_status": filter_status,
-            "trim_string_pks": getattr(args, "trim_string_pks", False),
-            "case_insensitive_match": getattr(args, "case_insensitive_match", False),
+            consts.CONFIG_FILTER_STATUS: filter_status,
+            consts.CONFIG_TRIM_STRING_PKS: getattr(args, consts.CONFIG_TRIM_STRING_PKS, False),
+            consts.CONFIG_CASE_INSENSITIVE_MATCH: getattr(args, consts.CONFIG_CASE_INSENSITIVE_MATCH, False),
             consts.CONFIG_ROW_CONCAT: getattr(args, consts.CONFIG_ROW_CONCAT, None),
             consts.CONFIG_ROW_HASH: getattr(args, consts.CONFIG_ROW_HASH, None),
             "verbose": args.verbose,
