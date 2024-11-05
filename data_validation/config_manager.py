@@ -246,6 +246,11 @@ class ConfigManager(object):
         return self._config.get(consts.CONFIG_ROW_HASH, [])
 
     @property
+    def run_id(self):
+        """Return field from Config"""
+        return self._config.get(consts.CONFIG_RUN_ID, None)
+
+    @property
     def filters(self):
         """Return Filters from Config"""
         return self._config.get(consts.CONFIG_FILTERS, [])
@@ -504,6 +509,7 @@ class ConfigManager(object):
         case_insensitive_match=None,
         concat=None,
         hash=None,
+        run_id=None,
         verbose=False,
     ):
         if isinstance(filter_config, dict):
@@ -536,6 +542,7 @@ class ConfigManager(object):
             consts.CONFIG_CASE_INSENSITIVE_MATCH: case_insensitive_match,
             consts.CONFIG_ROW_CONCAT: concat,
             consts.CONFIG_ROW_HASH: hash,
+            consts.CONFIG_RUN_ID: run_id,
         }
 
         return ConfigManager(

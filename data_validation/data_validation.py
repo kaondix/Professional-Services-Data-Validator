@@ -16,9 +16,9 @@ import json
 import logging
 import warnings
 from concurrent.futures import ThreadPoolExecutor
-
 import ibis.backends.pandas
 import pandas
+import uuid
 
 from data_validation import combiner, consts, metadata
 from data_validation.config_manager import ConfigManager
@@ -62,6 +62,9 @@ class DataValidation(object):
 
         self.run_metadata = metadata.RunMetadata()
         self.run_metadata.labels = self.config_manager.labels
+
+        # Use a generated uuid for the run_id if None was supplied via config
+        self.run_metadata.run_id = self.config_manager.run_id or str(uuid.uuid4())
 
         # Initialize Validation Builder if None was supplied
         self.validation_builder = validation_builder or ValidationBuilder(
