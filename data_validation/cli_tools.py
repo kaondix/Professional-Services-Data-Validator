@@ -590,8 +590,12 @@ def _configure_row_parser(
     required_arguments.add_argument(
         "--primary-keys",
         "-pk",
-        required=True,
-        help="Comma separated list of primary key columns 'col_a,col_b'",
+        required=is_custom_query,
+        help=(
+            "Comma separated list of primary key columns 'col_a,col_b'" ""
+            if is_custom_query
+            else " (defaults to table primary key if available)"
+        ),
     )
 
     # Group for mutually exclusive required arguments. Either must be supplied

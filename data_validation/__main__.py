@@ -320,6 +320,10 @@ def build_config_from_args(args: Namespace, config_manager: ConfigManager):
 
         # Append primary_keys
         primary_keys = cli_tools.get_arg_list(args.primary_keys)
+        if not primary_keys:
+            primary_keys = config_manager.default_primary_keys()
+        if not primary_keys:
+            raise ValueError("--primary-keys argument is required for this validation")
         config_manager.append_primary_keys(
             config_manager.build_column_configs(primary_keys)
         )
