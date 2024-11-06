@@ -32,6 +32,7 @@ CLI_ARGS = {
     "config_file": "example_test.yaml",
     "labels": "name=test_run",
     "threshold": 30.0,
+    "run_id": "aa000000-0000-0000-0000-000000000001",
     "verbose": True,
 }
 
@@ -98,6 +99,7 @@ TEST_VALIDATION_CONFIG = {
                     "type": "count",
                 }
             ],
+            "run_id": "aa000000-0000-0000-0000-000000000001",
         }
     ],
 }
@@ -125,6 +127,7 @@ def test_get_parsed_args(mock_args):
     assert args.command == "validate"
     assert args.labels == "name=test_run"
     assert args.threshold == 30.0
+    assert args.run_id == "aa000000-0000-0000-0000-000000000001"
     assert args.verbose
 
 

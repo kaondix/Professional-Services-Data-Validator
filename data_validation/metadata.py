@@ -14,11 +14,9 @@
 
 """Metadata classes with data about the validation run."""
 
-
 import dataclasses
 import datetime
 import typing
-import uuid
 
 from data_validation import consts
 
@@ -64,7 +62,7 @@ class ValidationMetadata(object):
 
 @dataclasses.dataclass
 class RunMetadata(object):
-    run_id: str = dataclasses.field(default_factory=lambda: str(uuid.uuid4()))
+    run_id: str = dataclasses.field(default_factory=str)
     validations: dict = dataclasses.field(default_factory=dict)
     labels: list = dataclasses.field(default_factory=list)
     start_time: typing.Optional[datetime.datetime] = dataclasses.field(
