@@ -195,7 +195,6 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     caplog.clear()
     with pytest.raises(Exception) as e_info:
         main.config_runner(args)
-        # assert no warnings
     # assert that exception message was output for the failed validation
     # validation is called four times, once for each file
     # After all four files were validated, an exception was raised back to main to return status
