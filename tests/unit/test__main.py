@@ -173,6 +173,7 @@ def test_config_runner_3(mock_args, mock_build, mock_run, caplog):
     assert os.path.basename(mock_run.call_args.args[0].config_file) == "0002.yaml"
     assert len(mock_run.call_args.args[1]) == 1
 
+
 @mock.patch("data_validation.__main__.run_validations")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_yaml",
@@ -198,7 +199,9 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     # assert that exception message was output for the failed validation
     # validation is called four times, once for each file
     # After all four files were validated, an exception was raised back to main to return status
-    assert caplog.messages[0] == 'Error Boom! occurred while running config file 0001.yaml. Skipping it for now.'
+    assert (
+        caplog.messages[0]
+        == "Error Boom! occurred while running config file 0001.yaml. Skipping it for now."
+    )
     assert mock_run.call_count == 4
-    assert e_info.value.args[0] == 'Some of the validations raised an exception'
-
+    assert e_info.value.args[0] == "Some of the validations raised an exception"
