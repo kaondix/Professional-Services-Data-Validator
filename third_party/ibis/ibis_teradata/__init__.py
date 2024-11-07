@@ -130,9 +130,9 @@ class Backend(BaseSQLBackend):
         schema_list = schema_df.to_dict("records")
         schema = {}
         for col_data in schema_list:
-            schema[
-                col_data["Column SQL Name"].rstrip()
-            ] = TeradataTypeTranslator.to_ibis(col_data)
+            schema[col_data["Column SQL Name"].rstrip()] = (
+                TeradataTypeTranslator.to_ibis(col_data)
+            )
 
         return schema
 
@@ -260,6 +260,7 @@ class Backend(BaseSQLBackend):
         return df
 
     def list_primary_key_columns(self, database: str, table: str):
+        """Return a list of primary key column names."""
         list_pk_col_sql = """
             SELECT ColumnName
             FROM   DBC.IndicesV

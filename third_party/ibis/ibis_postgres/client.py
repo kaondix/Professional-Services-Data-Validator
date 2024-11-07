@@ -122,6 +122,23 @@ def list_schemas(self, like=None):
     return self._filter_with_like(schemas, like)
 
 
+def _list_primary_key_columns(self, database: str, table: str):
+    """Return a list of primary key column names."""
+    # From https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
+    list_pk_col_sql = f"""
+        SELECT a.attname
+        FROM   pg_index i
+        JOIN   pg_attribute a ON a.attrelid = i.indrelid
+                             AND a.attnum = ANY(i.indkey)
+        WHERE  i.indrelid = '{database}.{table}'::regclass
+        AND    i.indisprimary
+        """
+    with self.begin() as con:
+        result = con.exec_driver_sql(list_pk_col_sql)
+        return [_[0] for _ in result.cursor.fetchall()]
+
+
 PostgresBackend._metadata = _metadata
 PostgresBackend.list_databases = list_schemas
 PostgresBackend.do_connect = do_connect
+PostgresBackend.list_primary_key_columns = _list_primary_key_columns
