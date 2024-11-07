@@ -28,7 +28,7 @@ INSERT INTO `pso_data_validator`.`entries` VALUES
 ('John','I got here!',5),('Alex','Me too!',6),('Zoe','zippp!',7);
 COMMIT;
 
-DROP TABLE `pso_data_validator`.`test_data_types_mysql_row`;
+DROP TABLE IF EXISTS `pso_data_validator`.`test_data_types_mysql_row`;
 CREATE TABLE `pso_data_validator`.`test_data_types_mysql_row` (
   `serial_col` int(11) NOT NULL AUTO_INCREMENT,
   `int_col` int(3) DEFAULT NULL,
@@ -55,7 +55,7 @@ INSERT INTO `pso_data_validator`.`test_data_types_mysql_row` VALUES
 (10,100,'row10_text','1','row10_varchar',100.20,100.40,'2020-01-22 19:51:44','2021-06-09');
 COMMIT;
 
-DROP TABLE `pso_data_validator`.`dvt_core_types`;
+DROP TABLE IF EXISTS `pso_data_validator`.`dvt_core_types`;
 CREATE TABLE `pso_data_validator`.`dvt_core_types`
 (   id              int NOT NULL PRIMARY KEY
 ,   col_int8        tinyint
@@ -90,7 +90,7 @@ INSERT INTO `pso_data_validator`.`dvt_core_types` VALUES
  ,'Hello DVT','C ','Hello DVT'
  ,'1970-01-03','1970-01-03 00:00:03','1970-01-03 03:00:03');
 
-DROP TABLE `pso_data_validator`.`dvt_null_not_null`;
+DROP TABLE IF EXISTS `pso_data_validator`.`dvt_null_not_null`;
 CREATE TABLE `pso_data_validator`.`dvt_null_not_null`
 (   col_nn             datetime(0) NOT NULL
 ,   col_nullable       datetime(0)
@@ -98,7 +98,7 @@ CREATE TABLE `pso_data_validator`.`dvt_null_not_null`
 ,   col_src_n_trg_nn   datetime(0)
 ) COMMENT 'Nullable integration test table, MySQL is assumed to be a DVT source (not target).';
 
-DROP TABLE `pso_data_validator`.`dvt_binary`;
+DROP TABLE IF EXISTS `pso_data_validator`.`dvt_binary`;
 CREATE TABLE `pso_data_validator`.`dvt_binary`
 (   binary_id       varbinary(16) NOT NULL PRIMARY KEY
 ,   int_id          int NOT NULL
@@ -112,7 +112,7 @@ INSERT INTO pso_data_validator.dvt_binary VALUES
 ('DVT-key-4', 4, 'Row 4'),
 ('DVT-key-5', 5, 'Row 5');
 
-DROP TABLE `pso_data_validator`.`dvt_char_id`;
+DROP TABLE IF EXISTS `pso_data_validator`.`dvt_char_id`;
 CREATE TABLE `pso_data_validator`.`dvt_char_id`
 (   id          char(6) NOT NULL PRIMARY KEY
 ,   other_data  varchar(100)
@@ -124,7 +124,7 @@ INSERT INTO `pso_data_validator`.`dvt_char_id` VALUES
 ('DVT4', 'Row 4'),
 ('DVT5', 'Row 5');
 
-DROP TABLE `pso_data_validator`.`dvt_pangrams`;
+DROP TABLE IF EXISTS `pso_data_validator`.`dvt_pangrams`;
 CREATE TABLE `pso_data_validator`.`dvt_pangrams`
 (   id          int NOT NULL PRIMARY KEY
 ,   lang        varchar(100)
@@ -145,7 +145,7 @@ INSERT INTO `pso_data_validator`.`dvt_pangrams` VALUES
  'The sick person in pyjamas quickly trusted the swarthy driver');
 
 
-DROP TABLE `pso_data_validator`.`dvt_many_cols`;
+DROP TABLE IF EXISTS `pso_data_validator`.`dvt_many_cols`;
 CREATE TABLE `pso_data_validator`.`dvt_many_cols`
 ( id decimal(5)
 , col_001 varchar(2)
