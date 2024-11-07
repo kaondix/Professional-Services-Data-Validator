@@ -217,7 +217,9 @@ def _get_calculated_config(args, config_manager: ConfigManager) -> List[dict]:
     return calculated_configs
 
 
-def _get_comparison_config(args, config_manager: ConfigManager) -> List[dict]:
+def _get_comparison_config(
+    args, config_manager: ConfigManager, primary_keys: list
+) -> List[dict]:
     col_list = (
         None
         if config_manager.comparison_fields == "*"
@@ -228,11 +230,7 @@ def _get_comparison_config(args, config_manager: ConfigManager) -> List[dict]:
         args.exclude_columns,
     )
     # We can't have the PK columns in the comparison SQL twice therefore filter them out here if included.
-    comparison_fields = [
-        _
-        for _ in comparison_fields
-        if _ not in cli_tools.get_arg_list(args.primary_keys.casefold())
-    ]
+    comparison_fields = [_ for _ in comparison_fields if _ not in primary_keys]
 
     # As per #1190, add rstrip for Teradata string comparison fields
     if (
@@ -312,21 +310,22 @@ def build_config_from_args(args: Namespace, config_manager: ConfigManager):
             _get_calculated_config(args, config_manager)
         )
 
-        # Append Comparison fields
-        if args.comparison_fields:
-            config_manager.append_comparison_fields(
-                _get_comparison_config(args, config_manager)
-            )
-
         # Append primary_keys
         primary_keys = cli_tools.get_arg_list(args.primary_keys)
         if not primary_keys:
             primary_keys = config_manager.default_primary_keys()
         if not primary_keys:
             raise ValueError("--primary-keys argument is required for this validation")
+        primary_keys = [_.casefold() for _ in primary_keys]
         config_manager.append_primary_keys(
             config_manager.build_column_configs(primary_keys)
         )
+
+        # Append Comparison fields
+        if args.comparison_fields:
+            config_manager.append_comparison_fields(
+                _get_comparison_config(args, config_manager, primary_keys)
+            )
 
     return config_manager
 
