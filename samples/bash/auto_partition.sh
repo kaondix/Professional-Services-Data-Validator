@@ -26,7 +26,7 @@ function show_usage {
 
 # Constant based on internal testing.
 # Should be reliable because the size of a hash is constant.
-MB_PER_MILLION_ROWS=1500
+MB_PER_MILLION_ROWS=2000
 
 # Connection names
 SRC="ora"
