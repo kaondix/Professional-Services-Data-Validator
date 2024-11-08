@@ -90,8 +90,7 @@ class Backend(BaseAlchemyBackend):
                 raise NotImplementedError(
                     "cx_Oracle is currently the only supported driver"
                 )
-            dsn = """(description= (address=(protocol={})(host={})(port={}))
-            (connect_data=(service_name={})))""".format(
+            dsn = """(description=(address=(protocol={})(host={})(port={}))(connect_data=(service_name={})))""".format(
                 protocol, host, port, database
             )
             sa_url = sa.engine.url.URL.create(
