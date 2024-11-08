@@ -57,7 +57,7 @@ while getopts "ht:c:i:p:" OPT; do
       PRIMARY_KEYS=$OPTARG
       ;;
     p)
-      DVT-parallelism=$OPTARG
+      PARALLELISM=$OPTARG
       ;;
   esac
 done
