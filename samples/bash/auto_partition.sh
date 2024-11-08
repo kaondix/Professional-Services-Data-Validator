@@ -122,6 +122,8 @@ for i in $(seq 1 1 ${PARALLEL_PASSES});do
     echo "============"
     for j in $(seq 0 1 $(expr ${PARALLELISM} - 1));do
         echo "Submitting partition: ${JOB_COUNT}"
+        # JOB_COMPLETION_INDEX is a variable used by Kubernetes and catered for in DVT by the -kc option.
+        # We mimic this below to simplify picking a YAML file from cdir.
         JOB_COMPLETION_INDEX=${JOB_COUNT} data-validation configs run -kc -cdir ${YAML_TABLE_DIR} &
         JOB_COUNT=$(expr ${JOB_COUNT} + 1)
     done
