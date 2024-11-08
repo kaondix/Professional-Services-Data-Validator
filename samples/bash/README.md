@@ -66,7 +66,7 @@ Notes:
 
 #### 20 million rows
 
-Validate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Requesting parallelism of 8, 2 DVT processes per vCPU.
+Validate a 20m row table on a host with 4 vCPUs and only 4GB available RAM. Requesting parallelism of 8, two DVT processes per vCPU.
 ```
 $ ./auto_partition.sh -t dvt_test.tab_vol_20m -c 20000000 -i id -p 8
 Splitting dvt_test.tab_vol_20m
@@ -139,14 +139,14 @@ Submitting partition: 63
 ```
 
 Notes:
-- We requested 2 DVT processes per vCPU and therefore it ran 8 DVT partitions concurrently
+- We requested parallelism of 8, two DVT processes per vCPU
 - Because of low memory availability, 4GB, the table was split into 64 partitions
 - The 64 partitions will take 8 passes to be processed
 - The validation took 14 minutes
 
 #### 100 million rows
 
-Validatate a 100m row table on a host with 4 vCPUs and only 30GB available RAM, requesting parallelism of 8, 2 DVTs per vCPU.
+Validatate a 100m row table on a host with 4 vCPUs and only 30GB available RAM, requesting parallelism of 8, two DVT processes per vCPU.
 ```
 $ ./auto_partition.sh -t dvt_test.tab_vol_100m -c 100000000 -i id -p 8
 Splitting dvt_test.tab_vol_100m
@@ -219,7 +219,7 @@ Submitting partition: 39
 ```
 
 Notes:
-- We requested 2 DVT processes per vCPU and therefore it ran 8 DVT partitions concurrently
+- We requested parallelism of 8, two DVT processes per vCPU
 - Because there was plenty of memory available, 30GB, the table was split into 40 partitions
 - The 40 partitions will take 5 passes to be processed
 - Validation of the 100m row table took 1 hour 45 minutes (your mileage may vary)
