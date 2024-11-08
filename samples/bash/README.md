@@ -20,6 +20,8 @@ TRG="pg"
 BQRH="--bq-result-handler=some-project.dvt_dataset.results"
 ```
 
+The script does not include `--filter-status=fail`, for a significant boost in performance you could add that option to your own script.
+
 ### Examples
 
 #### 1 million rows
