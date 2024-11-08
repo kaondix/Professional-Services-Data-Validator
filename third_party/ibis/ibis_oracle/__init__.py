@@ -117,6 +117,8 @@ class Backend(BaseAlchemyBackend):
             # Therefore the ugly hardcoding of 128 kicks the can down the road and unblocks a customer
             # who is working with Oracle 11g and a max identifier length of 30.
             max_identifier_length=128,
+            # Pessimistic disconnect handling
+            pool_pre_ping=True,
         )
         try:
             # Identify the session in Oracle as DVT, no-op if this fails.
