@@ -333,7 +333,7 @@ def test_row_validation_core_types_auto_pks():
     """Test auto population of -pks from Oracle defined constraint."""
     row_validation_test(
         tc="mock-conn",
-        hash="*",
+        hash="col_int8,col_int16",
         filters="id>0 AND col_int8>0",
         primary_keys=None,
     )

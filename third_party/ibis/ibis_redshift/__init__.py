@@ -82,7 +82,7 @@ class Backend(BaseAlchemyBackend):
         name = self._quote(raw_name)
         type_info_sql = """\
     SELECT
-    "column", "type" 
+    "column", "type"
     FROM PG_TABLE_DEF
     WHERE tablename = :raw_name
     """
@@ -100,6 +100,11 @@ class Backend(BaseAlchemyBackend):
         self, name: str, definition: sa.sql.compiler.Compiled
     ) -> str:
         yield f"CREATE OR REPLACE TEMPORARY VIEW {name} AS {definition}"
+
+    def list_primary_key_columns(self, database: str, table: str) -> list:
+        """Return a list of primary key column names."""
+        # TODO nj@2024-11-08 It's not clear if this is possible, we should revisit if it becomes a requirement.
+        return None
 
 
 def _get_type(typestr: str) -> dt.DataType:

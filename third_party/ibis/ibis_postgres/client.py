@@ -122,7 +122,7 @@ def list_schemas(self, like=None):
     return self._filter_with_like(schemas, like)
 
 
-def _list_primary_key_columns(self, database: str, table: str):
+def _list_primary_key_columns(self, database: str, table: str) -> list:
     """Return a list of primary key column names."""
     # From https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
     list_pk_col_sql = f"""

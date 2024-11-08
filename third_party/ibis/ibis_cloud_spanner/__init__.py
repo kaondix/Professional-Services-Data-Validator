@@ -214,6 +214,11 @@ class Backend(BaseSQLBackend):
     def fetch_from_cursor():
         pass
 
+    def list_primary_key_columns(self, database: str, table: str) -> list:
+        """Return a list of primary key column names."""
+        # TODO nj@2024-11-08 It's not clear if this is possible, we should revisit if it becomes a requirement.
+        return None
+
 
 def parse_instance_and_dataset(
     instance: str, dataset: Optional[str] = None

@@ -136,7 +136,7 @@ class Backend(BaseAlchemyBackend):
             cursor = result.cursor
             yield from ((column[0], _get_type(column)) for column in cursor.description)
 
-    def list_primary_key_columns(self, database: str, table: str):
+    def list_primary_key_columns(self, database: str, table: str) -> list:
         """Return a list of primary key column names."""
         list_pk_col_sql = """
             SELECT cc.column_name

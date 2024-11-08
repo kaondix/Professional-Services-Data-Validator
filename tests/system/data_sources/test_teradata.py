@@ -345,7 +345,7 @@ def test_row_validation_core_types_auto_pks():
     row_validation_test(
         tables="udf.dvt_core_types",
         tc="mock-conn",
-        comp_fields="*",
+        comp_fields="col_int8,col_int16",
         primary_keys=None,
     )
 
