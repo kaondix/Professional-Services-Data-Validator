@@ -77,8 +77,9 @@ def validate_rows(table_info, source_conn, target_conn):
 
             columns = info['columns']
             comparison_fields = ','.join(columns)
-            print(f"Comapring: {table_name}'s {comparison_fields}")
+            # print(f"Comapring: {table_name}'s {comparison_fields}")
                     
+            # Command for row validation
             command = [
                 "data-validation", "validate", "row",
                 "-sc", source_conn,
@@ -141,14 +142,11 @@ def main():
     try:
         tables = get_table_names(db_config)
         row_results = validate_rows(tables, source_conn, target_conn)
-        return json.dumps(row_results, ensure_ascii=False)
+        return json.dumps({"results": row_results}, ensure_ascii=False)
     
     except Exception as e:
-        return {"error": str(e)}
+        return json.dumps({"error": str(e)}, ensure_ascii=False)
 
 if __name__ == "__main__":
     result = main()
-    if result:
-        print(result)
-    else:
-        print("ERROR")
+    print(result)

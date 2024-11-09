@@ -20,7 +20,7 @@ def get_table_names(database_config):
             # error
             return 0
 
-        print(f"Validating table: {tables}")
+        # print(f"Validating table: {tables}")
         return tables
     except mysql.connector.Error as error:
         raise ConnectionError(f"Database connection error: {error}")
@@ -47,13 +47,13 @@ def validate_tables(tables, source_conn, target_conn):
         ])
 
         for table_name in tables:
-            print(f"Google Validating: {table_name}")
 
+            # Command for column validation
             command = [
                 "data-validation", "validate", "column",
                 "-sc", source_conn,
                 "-tc", target_conn,
-                "-tbls", f"public.{table_name}",
+                "-tbls", f"public.{table_name}", # TODO: 'public' might need to be changed into user input, schema may need to be sepcified
                 "--count", "*",
                 "--format", "json"
             ]
@@ -80,6 +80,7 @@ def validate_tables(tables, source_conn, target_conn):
                     ])
                     
             except subprocess.CalledProcessError as e:
+                # TODO: 处理 还没有创建连接 的报错
                 print(f"Table {table_name} error while processing: {e}")
                 print(e.output)
                 
@@ -108,17 +109,13 @@ def main():
         
         results = validate_tables(tables, source_conn, tagret_conn)
         
-        return json.dumps(results, ensure_ascii=False)
+        return json.dumps({"results": results}, ensure_ascii=False)
         
     except Exception as e:
-        return {"error": str(e)}
+        return json.dumps({"error": str(e)}, ensure_ascii=False)
         
 
 if __name__ == "__main__":
     
     result = main()
-    
-    if result:
-        print(result)
-    else:
-        print("ERROR")
+    print(result)

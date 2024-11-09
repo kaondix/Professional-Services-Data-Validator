@@ -5,6 +5,6 @@ import ValidationController from '../controller/ValidationController';
 const ValidationRouter = Router();
 
 ValidationRouter.post('/column', ValidationController.validationColumn);
-ValidationRouter.get('/row', ValidationController.validationRow);
+ValidationRouter.post('/row', ValidationController.validationRow);
 
 export default ValidationRouter;
