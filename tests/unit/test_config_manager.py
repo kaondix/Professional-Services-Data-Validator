@@ -624,6 +624,8 @@ def test_build_comp_fields(module_under_test):
         ["a", "c", "e"],
         False,
     )
+    # Column "e" does not exists and therefore should not be in the list, even though
+    # it was requested.
     assert comparison_fields == {"a": "a", "c": "c"}
 
     # With exclude_columns=True
