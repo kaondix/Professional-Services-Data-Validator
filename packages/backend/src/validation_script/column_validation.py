@@ -34,55 +34,57 @@ def validate_tables(tables, source_conn, target_conn):
     final_result = []
 
     # Create the target path 
-    save_path = os.path.join(os.path.dirname(__file__), '../../src/validation_script/column_validation_results.csv')
+    # save_path = os.path.join(os.path.dirname(__file__), '../../src/validation_script/column_validation_results.csv')
 
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    # os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    with open(save_path, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            "Validation Name", "Validation Type", "Source Table Name", "Source Column Name",
-            "Source Aggregation Value", "Target Aggregation Value", "Percentage Difference",
-            "Validation Status", "Run ID"
-        ])
+    # Only generate csv file when 'resultType' is 'CSV'
 
-        for table_name in tables:
+    # with open(save_path, mode="w", newline="") as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow([
+    #         "Validation Name", "Validation Type", "Source Table Name", "Source Column Name",
+    #         "Source Aggregation Value", "Target Aggregation Value", "Percentage Difference",
+    #         "Validation Status", "Run ID"
+    #     ])
 
-            # Command for column validation
-            command = [
-                "data-validation", "validate", "column",
-                "-sc", source_conn,
-                "-tc", target_conn,
-                "-tbls", f"public.{table_name}", # TODO: 'public' might need to be changed into user input, schema may need to be sepcified
-                "--count", "*",
-                "--format", "json"
-            ]
+    for table_name in tables:
 
-            try:
+        # Command for column validation
+        command = [
+            "data-validation", "validate", "column",
+            "-sc", source_conn,
+            "-tc", target_conn,
+            "-tbls", f"public.{table_name}", # TODO: 'public' might need to be changed into user input, schema may need to be sepcified
+            "--count", "*",
+            "--format", "json"
+        ]
+
+        try:
+            
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            
+            result_data = json.loads(result.stdout)
+            
+            final_result.append(result_data)
+            
+                # for key, record in result_data.items():
+                #     writer.writerow([
+                #         record.get("validation_name", ""),
+                #         record.get("validation_type", ""),
+                #         record.get("source_table_name", ""),
+                #         record.get("source_column_name", ""),
+                #         record.get("source_agg_value", ""),
+                #         record.get("target_agg_value", ""),
+                #         record.get("pct_difference", ""),
+                #         record.get("validation_status", ""),
+                #         record.get("run_id", "")
+                #     ])
                 
-                result = subprocess.run(command, capture_output=True, text=True, check=True)
-                
-                result_data = json.loads(result.stdout)
-                
-                final_result.append(result_data)
-                
-                for key, record in result_data.items():
-                    writer.writerow([
-                        record.get("validation_name", ""),
-                        record.get("validation_type", ""),
-                        record.get("source_table_name", ""),
-                        record.get("source_column_name", ""),
-                        record.get("source_agg_value", ""),
-                        record.get("target_agg_value", ""),
-                        record.get("pct_difference", ""),
-                        record.get("validation_status", ""),
-                        record.get("run_id", "")
-                    ])
-                    
-            except subprocess.CalledProcessError as e:
-                # TODO: 处理 还没有创建连接 的报错
-                print(f"Table {table_name} error while processing: {e}")
-                print(e.output)
+        except subprocess.CalledProcessError as e:
+            # TODO: 处理 还没有创建连接 的报错
+            print(f"Table {table_name} error while processing: {e}")
+            print(e.output)
                 
     return final_result
 

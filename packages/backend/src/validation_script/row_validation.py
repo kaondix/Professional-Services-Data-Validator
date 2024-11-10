@@ -57,69 +57,69 @@ def validate_rows(table_info, source_conn, target_conn):
     final_result = []
     
     # Create the target path
-    save_path = os.path.join(os.path.dirname(__file__), '../../src/validation_script/row_validation_results.csv')
+    # save_path = os.path.join(os.path.dirname(__file__), '../../src/validation_script/row_validation_results.csv')
 
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    # os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    with open(save_path, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            "Validation Name", "Validation Type", "Source Table Name", "Source Column Name",
-            "Source Aggregation Value", "Target Table Name", "Target Column Name",
-            "Target Aggregation Value", "Group By Columns", "Primary Keys", "Number of Random Rows",
-            "Difference", "Percentage Difference", "Percentage Threshold", "Validation Status",
-            "Run ID", "Start Time", "End Time"
-        ])
+    # with open(save_path, mode="w", newline="") as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow([
+    #         "Validation Name", "Validation Type", "Source Table Name", "Source Column Name",
+    #         "Source Aggregation Value", "Target Table Name", "Target Column Name",
+    #         "Target Aggregation Value", "Group By Columns", "Primary Keys", "Number of Random Rows",
+    #         "Difference", "Percentage Difference", "Percentage Threshold", "Validation Status",
+    #         "Run ID", "Start Time", "End Time"
+    #     ])
 
-        for table_name, info in table_info.items():
-            primary_key = info['primary_key']  # Use the primary key
-            columns = info['columns'] # Compare each column in all database
+    for table_name, info in table_info.items():
+        primary_key = info['primary_key']  # Use the primary key
+        columns = info['columns'] # Compare each column in all database
 
-            columns = info['columns']
-            comparison_fields = ','.join(columns)
-            # print(f"Comapring: {table_name}'s {comparison_fields}")
+        columns = info['columns']
+        comparison_fields = ','.join(columns)
+        # print(f"Comapring: {table_name}'s {comparison_fields}")
                     
-            # Command for row validation
-            command = [
-                "data-validation", "validate", "row",
-                "-sc", source_conn,
-                "-tc", target_conn,
-                "-tbls", f"public.{table_name}",
-                "--primary-keys", primary_key,
-                "--comparison-fields", comparison_fields,
-                "--format", "json"
-            ]
+        # Command for row validation
+        command = [
+            "data-validation", "validate", "row",
+            "-sc", source_conn,
+            "-tc", target_conn,
+            "-tbls", f"public.{table_name}",
+            "--primary-keys", primary_key,
+            "--comparison-fields", comparison_fields,
+            "--format", "json"
+        ]
 
-            try:
-                result = subprocess.run(command, capture_output=True, text=True, check=True)
-                result_data = json.loads(result.stdout)
-                final_result.append(result_data)
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            result_data = json.loads(result.stdout)
+            final_result.append(result_data)
 
-                for key, record in result_data.items():
-                    writer.writerow([
-                        record.get("validation_name", ""),
-                        record.get("validation_type", ""),
-                        record.get("source_table_name", ""),
-                        record.get("source_column_name", ""),
-                        record.get("source_agg_value", ""),
-                        record.get("target_table_name", ""),
-                        record.get("target_column_name", ""),
-                        record.get("target_agg_value", ""),
-                        record.get("group_by_columns", ""),
-                        record.get("primary_keys", ""),
-                        record.get("num_random_rows", ""),
-                        record.get("difference", ""),
-                        record.get("pct_difference", ""),
-                        record.get("pct_threshold", ""),
-                        record.get("validation_status", ""),
-                        record.get("run_id", ""),
-                        record.get("start_time", ""),
-                        record.get("end_time", "")
-                    ])
+                # for key, record in result_data.items():
+                #     writer.writerow([
+                #         record.get("validation_name", ""),
+                #         record.get("validation_type", ""),
+                #         record.get("source_table_name", ""),
+                #         record.get("source_column_name", ""),
+                #         record.get("source_agg_value", ""),
+                #         record.get("target_table_name", ""),
+                #         record.get("target_column_name", ""),
+                #         record.get("target_agg_value", ""),
+                #         record.get("group_by_columns", ""),
+                #         record.get("primary_keys", ""),
+                #         record.get("num_random_rows", ""),
+                #         record.get("difference", ""),
+                #         record.get("pct_difference", ""),
+                #         record.get("pct_threshold", ""),
+                #         record.get("validation_status", ""),
+                #         record.get("run_id", ""),
+                #         record.get("start_time", ""),
+                #         record.get("end_time", "")
+                #     ])
 
-            except subprocess.CalledProcessError as e:
-                print(f"Error processing table {table_name}: {e}")
-                print(e.output)
+        except subprocess.CalledProcessError as e:
+            print(f"Error processing table {table_name}: {e}")
+            print(e.output)
                 
     return final_result
 

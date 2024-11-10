@@ -9,8 +9,8 @@ class ValidationController {
         console.log("Validating column...")
 
         try {
-            const { host, user, password, database, source_conn, target_conn } = req.body;
-            const result = await ValidationService.validationColumn(host, user, password, database, source_conn, target_conn);
+            const { host, user, password, database, source_conn, target_conn, resultType } = req.body;
+            const result = await ValidationService.validationColumn(host, user, password, database, source_conn, target_conn, resultType);
             const jsonResult = JSON.parse(result);
             // console.log("===> ", jsonResult)
 
@@ -39,8 +39,8 @@ class ValidationController {
         console.log("Validating row...")
 
         try {
-            const { host, user, password, database, source_conn, target_conn } = req.body;
-            const result = await ValidationService.validationRow(host, user, password, database, source_conn, target_conn);
+            const { host, user, password, database, source_conn, target_conn, resultType } = req.body;
+            const result = await ValidationService.validationRow(host, user, password, database, source_conn, target_conn, resultType);
             const jsonResult = JSON.parse(result);
             // console.log("===> ", jsonResult)
 

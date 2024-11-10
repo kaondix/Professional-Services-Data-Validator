@@ -26,6 +26,39 @@ def create_connection(conn_name, db_type, host, port, user, password, database):
             "--password", password,
             "--database", database
         ]
+    elif db_type == "Oracle":
+        command = [
+            "data-validation", "connections", "add", 
+            "--connection-name", connection_name, "Oracle",
+            "--host", host,
+            "--port", port,
+            "--user", user,
+            "--password", password,
+            "--database", database
+        ]
+        
+    elif db_type == "Snowflake":
+        command = [
+            "data-validation", "connections", "add", 
+            "--connection-name", connection_name, "Snowflake", #TODO: DATABASE/SCHEMA 
+            "--host", host,
+            "--port", port,
+            "--user", user,
+            "--password", password,
+            "--database", database
+        ]
+        
+    elif db_type == "MSSQL":
+        command = [
+            "data-validation", "connections", "add", 
+            "--connection-name", connection_name, "MSSQL",
+            "--host", host,
+            "--port", port,
+            "--user", user,
+            "--password", password,
+            "--database", database
+        ]
+        
     else:
         return {"error": f"Unsupported database type: {db_type}"}
 
