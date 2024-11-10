@@ -14,6 +14,9 @@ class CreateConnectionService {
 
                 if (dbType == 'Snowflake') {
                     const snowDB = `${database}/${schema}`;
+
+                    console.log("snowflake的db===>", snowDB);
+                    
                     command = [scriptPath, connName, dbType, host, port, user, password, snowDB];
                 } else {
                     command = [scriptPath, connName, dbType, host, port, user, password, database];

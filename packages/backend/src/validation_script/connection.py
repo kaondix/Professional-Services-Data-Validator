@@ -40,11 +40,10 @@ def create_connection(conn_name, db_type, host, port, user, password, database):
     elif db_type == "Snowflake":
         command = [
             "data-validation", "connections", "add", 
-            "--connection-name", connection_name, "Snowflake", #TODO: DATABASE/SCHEMA 
-            "--host", host,
-            "--port", port,
+            "--connection-name", connection_name, "Snowflake",
             "--user", user,
             "--password", password,
+            "--account", host,
             "--database", database
         ]
         

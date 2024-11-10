@@ -16,8 +16,6 @@ class CreateConnectionController {
 
       const result = await CreateConnectionService.createConnection(connName, dbType, host, port, user, password, database, schema);
 
-      console.log("创建连接了=====> ", result)
-
       if (result.error != null) {
         const resultFinal = {
           'validationStatus': "ERROR",
