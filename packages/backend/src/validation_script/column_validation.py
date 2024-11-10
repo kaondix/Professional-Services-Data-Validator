@@ -25,7 +25,7 @@ def get_table_names(database_config):
     except mysql.connector.Error as error:
         raise ConnectionError(f"Database connection error: {error}")
 
-def validate_tables(tables, source_conn, target_conn):        
+def validate_tables(tables, source_conn, target_conn, schema):        
     
     if (len(tables) == 0): 
         print(f"No tables in the target databse")
@@ -55,7 +55,8 @@ def validate_tables(tables, source_conn, target_conn):
             "data-validation", "validate", "column",
             "-sc", source_conn,
             "-tc", target_conn,
-            "-tbls", f"public.{table_name}", # TODO: 'public' might need to be changed into user input, schema may need to be sepcified
+            # SOURCE_SCHEMA.SOURCE_TABLE
+            "-tbls", f"{schema}.{table_name}",
             "--count", "*",
             "--format", "json"
         ]
@@ -92,7 +93,7 @@ def validate_tables(tables, source_conn, target_conn):
 def main():
     
     # Validate the input vales -  sys.argv[0] is the python script file name
-    if len(sys.argv) != 7:
+    if len(sys.argv) != 8:
         print("Input is not valid")
         return
     
@@ -105,11 +106,12 @@ def main():
         
     source_conn = sys.argv[5]
     tagret_conn = sys.argv[6]
+    schema = sys.argv[7]
     
     try:
         tables = get_table_names(db_config)
         
-        results = validate_tables(tables, source_conn, tagret_conn)
+        results = validate_tables(tables, source_conn, tagret_conn, schema)
         
         return json.dumps({"results": results}, ensure_ascii=False)
         

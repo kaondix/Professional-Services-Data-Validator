@@ -5,12 +5,12 @@ import fs from 'fs'
 
 class ValidationService {
 
-    public static async validationColumn(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string): Promise<any> {
+    public static async validationColumn(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string, schema: string): Promise<any> {
         return new Promise((resolve, reject) => {
 
             const scriptPath = path.join(__dirname, '../../src/validation_script/column_validation.py');
 
-            const process = spawn('python', [scriptPath, host, user, password, database, source_conn, target_conn]);
+            const process = spawn('python', [scriptPath, host, user, password, database, source_conn, target_conn, schema]);
 
             let output = '';
             let errorOutput = '';
@@ -51,12 +51,12 @@ class ValidationService {
     };
 
 
-    public static async validationRow(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string): Promise<any> {
+    public static async validationRow(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string, schema: string): Promise<any> {
         return new Promise((resolve, reject) => {
 
             const scriptPath = path.join(__dirname, '../../src/validation_script/row_validation.py');
 
-            const process = spawn('python', [scriptPath, host, user, password, database, source_conn, target_conn]);
+            const process = spawn('python', [scriptPath, host, user, password, database, source_conn, target_conn, schema]);
 
             let output = '';
             let errorOutput = '';
@@ -76,7 +76,7 @@ class ValidationService {
 
                         if (resultType == 'CSV') {
 
-                            // conver json into csv
+                            // conver json into csv - TODO: error occur when converting into csv
                             this.convertJSONtoCSV(JSON.parse(output).results, 'row');
                             resolve(output);
 
@@ -140,6 +140,7 @@ class ValidationService {
 
         } catch (error) {
             console.log("ERROR: ===> ", error);
+            return error;
         }
     };
 

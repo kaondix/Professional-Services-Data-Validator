@@ -48,7 +48,7 @@ def get_table_names(database_config):
         raise ConnectionError(f"Database connection error: {error}")
 
 # Row validation
-def validate_rows(table_info, source_conn, target_conn):
+def validate_rows(table_info, source_conn, target_conn, schema):
     
     if not table_info: 
         print("No tables with primary keys in the target database.")
@@ -84,7 +84,8 @@ def validate_rows(table_info, source_conn, target_conn):
             "data-validation", "validate", "row",
             "-sc", source_conn,
             "-tc", target_conn,
-            "-tbls", f"public.{table_name}",
+            # SOURCE_SCHEMA.SOURCE_TABLE
+            "-tbls", f"{schema}.{table_name}",
             "--primary-keys", primary_key,
             "--comparison-fields", comparison_fields,
             "--format", "json"
@@ -125,7 +126,7 @@ def validate_rows(table_info, source_conn, target_conn):
 
 def main():
     # Validate input values
-    if len(sys.argv) != 7:
+    if len(sys.argv) != 8:
         print("Input is not valid")
         return
     
@@ -138,10 +139,11 @@ def main():
         
     source_conn = sys.argv[5]
     target_conn = sys.argv[6]
+    schema = sys.argv[7]
 
     try:
         tables = get_table_names(db_config)
-        row_results = validate_rows(tables, source_conn, target_conn)
+        row_results = validate_rows(tables, source_conn, target_conn, schema)
         return json.dumps({"results": row_results}, ensure_ascii=False)
     
     except Exception as e:
