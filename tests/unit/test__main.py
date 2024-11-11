@@ -18,7 +18,7 @@ import os
 from unittest import mock
 import pytest
 
-from data_validation import cli_tools
+from data_validation import cli_tools, exceptions
 from data_validation import __main__ as main
 
 
@@ -72,6 +72,10 @@ CONFIG_RUNNER_ARGS_4 = {
     "validation_config_cmd": "run",
     "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/4partitions",
 }
+
+CONFIG_RUNNER_EXCEPTION_TEXT = (
+    "Error '{}' occurred while running config file {}. Skipping it for now."
+)
 
 
 @mock.patch(
@@ -193,14 +197,13 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     caplog.set_level(logging.WARNING)
     args = cli_tools.get_parsed_args()
     caplog.clear()
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(exceptions.ValidationException) as e_info:
         main.config_runner(args)
     # assert that exception message was output for the failed validation
     # validation is called four times, once for each file
     # After all four files were validated, an exception was raised back to main to return status
-    assert (
-        caplog.messages[0]
-        == "Error Boom! occurred while running config file 0001.yaml. Skipping it for now."
+    assert caplog.messages[0] == CONFIG_RUNNER_EXCEPTION_TEXT.format(
+        "Boom!", "0001.yaml"
     )
     assert mock_run.call_count == 4
     assert e_info.value.args[0] == "Some of the validations raised an exception"

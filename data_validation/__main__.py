@@ -25,6 +25,7 @@ from data_validation import (
     clients,
     consts,
     state_manager,
+    exceptions,
 )
 from data_validation.config_manager import ConfigManager
 from data_validation.data_validation import DataValidation
@@ -400,12 +401,14 @@ def config_runner(args):
                 except Exception as e:
                     errors = True
                     logging.error(
-                        "Error %s occurred while running config file %s. Skipping it for now.",
+                        "Error '%s' occurred while running config file %s. Skipping it for now.",
                         str(e),
                         file,
                     )
             if errors:
-                raise Exception("Some of the validations raised an exception")
+                raise exceptions.ValidationException(
+                    "Some of the validations raised an exception"
+                )
     else:
         if args.kube_completions:
             logging.warning(
