@@ -96,31 +96,33 @@ class ValidationService {
     };
 
     // Methods to convert the json data into a csv file - column validation
-    public static convertJSONtoCSV(jsonData: Object[], type: string, content: string) {
+    public static convertJSONtoCSV(jsonData: Object[], type: string, content: string): string | Error {
 
-        try {
-        
-            // Extract each nested object from the original json
-            const preparedData = jsonData.flatMap(item => {
-                return Object.values(item);
-            });
+        // Extract each nested object from the original json
+        const preparedData = jsonData.flatMap(item => {
+            return Object.values(item);
+        });
 
-            let finalData: Object[] = [];
+        let finalData: Object[] = [];
 
-            if (content === 'ONLY_FAILED') {
-                finalData = preparedData.filter(item => item.validation_status === 'fail');
-                this.writeCSV(finalData, type)
-            } else {
-                this.writeCSV(preparedData, type)
+        if (content === 'ONLY_FAILED') {
+            finalData = preparedData.filter(item => item.validation_status === 'fail');
+            if (finalData != null) { // Has failure item
+                const result = this.writeCSV(finalData, type)
+                return result;
+            } else { // Transformation succeeded, no errors
+                const result = this.writeCSV(preparedData, type);
+                return result;
             }
-
-        } catch (error) {
-            console.log("ERROR: ===> ", error);
-            return error;
+        } else { // all data
+            const result = this.writeCSV(preparedData, type);
+            return result;
         }
+
+
     };
 
-    public static writeCSV(inputData: Object[], type: string) {
+    public static writeCSV(inputData: Object[], type: string): string | Error {
 
         try {
             const fields = [
@@ -158,10 +160,12 @@ class ValidationService {
             const savePath = `./src/${fileName}_${type}.csv`;
             fs.writeFileSync(savePath, csv);
 
+            return "OK";
 
         } catch (error) {
             console.log("ERROR: ===> ", error);
-            return error;
+            // Return error
+            return error instanceof Error ? error : new Error(String(error));
         }
 
     }
