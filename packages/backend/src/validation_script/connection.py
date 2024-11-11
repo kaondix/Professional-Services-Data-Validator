@@ -37,7 +37,7 @@ def create_connection(conn_name, db_type, host, port, user, password, database):
             "--database", database
         ]
         
-    elif db_type == "Snowflake":
+    elif db_type == "Snowflake": # Speical one
         command = [
             "data-validation", "connections", "add", 
             "--connection-name", connection_name, "Snowflake",

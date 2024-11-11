@@ -2,10 +2,11 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { Parser } from '@json2csv/plainjs'
 import fs from 'fs'
+import { json } from 'stream/consumers';
 
 class ValidationService {
 
-    public static async validationColumn(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string, schema: string): Promise<any> {
+    public static async validationColumn(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string, schema: string, content: string): Promise<any> {
         return new Promise((resolve, reject) => {
 
             const scriptPath = path.join(__dirname, '../../src/validation_script/column_validation.py');
@@ -32,7 +33,7 @@ class ValidationService {
                             if (resultType == 'CSV') {
 
                                 // conver json into csv
-                                this.convertJSONtoCSV(JSON.parse(output).results, 'column');
+                                this.convertJSONtoCSV(JSON.parse(output).results, 'column', content);
                                 resolve(output);
 
                             } else {
@@ -51,7 +52,7 @@ class ValidationService {
     };
 
 
-    public static async validationRow(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string, schema: string): Promise<any> {
+    public static async validationRow(host: string, user: string, password: string, database: string, source_conn: string, target_conn: string, resultType: string, schema: string, content: string): Promise<any> {
         return new Promise((resolve, reject) => {
 
             const scriptPath = path.join(__dirname, '../../src/validation_script/row_validation.py');
@@ -77,7 +78,7 @@ class ValidationService {
                         if (resultType == 'CSV') {
 
                             // conver json into csv - TODO: error occur when converting into csv
-                            this.convertJSONtoCSV(JSON.parse(output).results, 'row');
+                            this.convertJSONtoCSV(JSON.parse(output).results, 'row', content);
                             resolve(output);
 
                         } else {
@@ -95,7 +96,31 @@ class ValidationService {
     };
 
     // Methods to convert the json data into a csv file - column validation
-    public static convertJSONtoCSV(jsonData: Object[], type: string) {
+    public static convertJSONtoCSV(jsonData: Object[], type: string, content: string) {
+
+        try {
+        
+            // Extract each nested object from the original json
+            const preparedData = jsonData.flatMap(item => {
+                return Object.values(item);
+            });
+
+            let finalData: Object[] = [];
+
+            if (content === 'ONLY_FAILED') {
+                finalData = preparedData.filter(item => item.validation_status === 'fail');
+                this.writeCSV(finalData, type)
+            } else {
+                this.writeCSV(preparedData, type)
+            }
+
+        } catch (error) {
+            console.log("ERROR: ===> ", error);
+            return error;
+        }
+    };
+
+    public static writeCSV(inputData: Object[], type: string) {
 
         try {
             const fields = [
@@ -119,14 +144,9 @@ class ValidationService {
                 { value: 'end_time', label: "End Time" }
             ];
 
-            // Extract each nested object from the original json
-            const preparedData = jsonData.flatMap(item => {
-                return Object.values(item);
-            });
-
             const opts = { fields };
             const parser = new Parser(opts);
-            const csv = parser.parse(preparedData);
+            const csv = parser.parse(inputData);
 
             const current = new Date();
             const hours = current.getHours().toString().padStart(2, '0');
@@ -138,11 +158,13 @@ class ValidationService {
             const savePath = `./src/${fileName}_${type}.csv`;
             fs.writeFileSync(savePath, csv);
 
+
         } catch (error) {
             console.log("ERROR: ===> ", error);
             return error;
         }
-    };
+
+    }
 
 
 }
