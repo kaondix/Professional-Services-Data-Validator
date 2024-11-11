@@ -334,7 +334,6 @@ def test_row_validation_core_types_auto_pks():
     row_validation_test(
         tc="mock-conn",
         hash="col_int8,col_int16",
-        filters="id>0 AND col_int8>0",
         primary_keys=None,
     )
 
