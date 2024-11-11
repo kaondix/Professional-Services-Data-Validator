@@ -18,23 +18,13 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 import ibis.backends.pandas
 import pandas
-import time
 import uuid
 
-from data_validation import combiner, consts, metadata
+from data_validation import combiner, consts, metadata, util
 from data_validation.config_manager import ConfigManager
 from data_validation.query_builder.random_row_builder import RandomRowBuilder
 from data_validation.schema_validation import SchemaValidation
 from data_validation.validation_builder import ValidationBuilder
-
-
-def _timed(log_txt, fn, *args, **kwargs) -> pandas.DataFrame:
-    t0 = time.time()
-    df = fn(*args, **kwargs)
-    elapsed = time.time() - t0
-    logging.info(f"{log_txt} elapsed seconds: {round(elapsed,2)}")
-    return df
-
 
 """ The DataValidation class is where the code becomes source/target aware
 
@@ -111,7 +101,7 @@ class DataValidation(object):
             )
         elif self.config_manager.validation_type == consts.SCHEMA_VALIDATION:
             """Perform only schema validation"""
-            result_df = _timed("Schema validation", self.schema_validator.execute)
+            result_df = util.timed("Schema validation", self.schema_validator.execute)
         else:
             result_df = self._execute_validation(
                 self.validation_builder, process_in_memory=True
@@ -333,7 +323,7 @@ class DataValidation(object):
                 # Submit the two query network calls concurrently
                 futures.append(
                     executor.submit(
-                        _timed,
+                        util.timed,
                         "Source query",
                         self.config_manager.source_client.execute,
                         source_query,
@@ -341,7 +331,7 @@ class DataValidation(object):
                 )
                 futures.append(
                     executor.submit(
-                        _timed,
+                        util.timed,
                         "Target query",
                         self.config_manager.target_client.execute,
                         target_query,
@@ -355,7 +345,7 @@ class DataValidation(object):
             )
 
             try:
-                result_df = _timed(
+                result_df = util.timed(
                     "Generate report",
                     combiner.generate_report,
                     pandas_client,

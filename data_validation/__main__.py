@@ -25,6 +25,7 @@ from data_validation import (
     clients,
     consts,
     state_manager,
+    util,
 )
 from data_validation.config_manager import ConfigManager
 from data_validation.data_validation import DataValidation
@@ -331,22 +332,25 @@ def build_config_managers_from_args(
     args: Namespace, validate_cmd: str = None
 ) -> List[ConfigManager]:
     """Return a list of config managers ready to execute."""
-    configs = []
 
-    # Get pre build configs to build ConfigManager objects
-    pre_build_configs_list = cli_tools.get_pre_build_configs(args, validate_cmd)
+    def _build_configs():
+        configs = []
 
-    # Build a list of ConfigManager objects
-    for pre_build_configs in pre_build_configs_list:
-        config_manager = ConfigManager.build_config_manager(**pre_build_configs)
+        # Get pre build configs to build ConfigManager objects
+        pre_build_configs_list = cli_tools.get_pre_build_configs(args, validate_cmd)
 
-        # Append post build configs to ConfigManager object
-        config_manager = build_config_from_args(args, config_manager)
+        # Build a list of ConfigManager objects
+        for pre_build_configs in pre_build_configs_list:
+            config_manager = ConfigManager.build_config_manager(**pre_build_configs)
 
-        # Append ConfigManager object to configs list
-        configs.append(config_manager)
+            # Append post build configs to ConfigManager object
+            config_manager = build_config_from_args(args, config_manager)
 
-    return configs
+            # Append ConfigManager object to configs list
+            configs.append(config_manager)
+        return configs
+
+    return util.timed("Build config", _build_configs)
 
 
 def config_runner(args):
