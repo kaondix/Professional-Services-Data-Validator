@@ -91,7 +91,7 @@ class DataValidation(object):
         """Execute Queries and Store Results"""
         # Apply random row filter before validations run
         if self.config_manager.use_random_rows():
-            self._add_random_row_filter()
+            util.timed_call("Random row filter", self._add_random_row_filter)
 
         # Run correct execution for the given validation type
         if self.config_manager.validation_type == consts.ROW_VALIDATION:
@@ -101,7 +101,9 @@ class DataValidation(object):
             )
         elif self.config_manager.validation_type == consts.SCHEMA_VALIDATION:
             """Perform only schema validation"""
-            result_df = util.timed("Schema validation", self.schema_validator.execute)
+            result_df = util.timed_call(
+                "Schema validation", self.schema_validator.execute
+            )
         else:
             result_df = self._execute_validation(
                 self.validation_builder, process_in_memory=True
@@ -323,7 +325,7 @@ class DataValidation(object):
                 # Submit the two query network calls concurrently
                 futures.append(
                     executor.submit(
-                        util.timed,
+                        util.timed_call,
                         "Source query",
                         self.config_manager.source_client.execute,
                         source_query,
@@ -331,7 +333,7 @@ class DataValidation(object):
                 )
                 futures.append(
                     executor.submit(
-                        util.timed,
+                        util.timed_call,
                         "Target query",
                         self.config_manager.target_client.execute,
                         target_query,
@@ -345,7 +347,7 @@ class DataValidation(object):
             )
 
             try:
-                result_df = util.timed(
+                result_df = util.timed_call(
                     "Generate report",
                     combiner.generate_report,
                     pandas_client,

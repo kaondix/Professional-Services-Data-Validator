@@ -350,7 +350,7 @@ def build_config_managers_from_args(
             configs.append(config_manager)
         return configs
 
-    return util.timed("Build config", _build_configs)
+    return util.timed_call("Build config", _build_configs)
 
 
 def config_runner(args):

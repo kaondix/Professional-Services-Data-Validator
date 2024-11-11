@@ -16,7 +16,7 @@ import logging
 import time
 
 
-def timed(log_txt, fn, *args, **kwargs):
+def timed_call(log_txt, fn, *args, **kwargs):
     t0 = time.time()
     result = fn(*args, **kwargs)
     elapsed = time.time() - t0
