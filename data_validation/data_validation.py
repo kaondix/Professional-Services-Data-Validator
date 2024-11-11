@@ -18,6 +18,7 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 import ibis.backends.pandas
 import pandas
+import time
 import uuid
 
 from data_validation import combiner, consts, metadata
@@ -25,6 +26,15 @@ from data_validation.config_manager import ConfigManager
 from data_validation.query_builder.random_row_builder import RandomRowBuilder
 from data_validation.schema_validation import SchemaValidation
 from data_validation.validation_builder import ValidationBuilder
+
+
+def _timed(log_txt, fn, *args, **kwargs) -> pandas.DataFrame:
+    t0 = time.time()
+    df = fn(*args, **kwargs)
+    elapsed = time.time() - t0
+    logging.info(f"{log_txt} elapsed seconds: {round(elapsed,2)}")
+    return df
+
 
 """ The DataValidation class is where the code becomes source/target aware
 
@@ -101,7 +111,7 @@ class DataValidation(object):
             )
         elif self.config_manager.validation_type == consts.SCHEMA_VALIDATION:
             """Perform only schema validation"""
-            result_df = self.schema_validator.execute()
+            result_df = _timed("Schema validation", self.schema_validator.execute)
         else:
             result_df = self._execute_validation(
                 self.validation_builder, process_in_memory=True
@@ -292,6 +302,7 @@ class DataValidation(object):
 
     def _execute_validation(self, validation_builder, process_in_memory=True):
         """Execute Against a Supplied Validation Builder"""
+
         self.run_metadata.validations = validation_builder.get_metadata()
 
         source_query = validation_builder.get_source_query()
@@ -322,12 +333,18 @@ class DataValidation(object):
                 # Submit the two query network calls concurrently
                 futures.append(
                     executor.submit(
-                        self.config_manager.source_client.execute, source_query
+                        _timed,
+                        "Source query",
+                        self.config_manager.source_client.execute,
+                        source_query,
                     )
                 )
                 futures.append(
                     executor.submit(
-                        self.config_manager.target_client.execute, target_query
+                        _timed,
+                        "Target query",
+                        self.config_manager.target_client.execute,
+                        target_query,
                     )
                 )
                 source_df = futures[0].result()
@@ -338,7 +355,9 @@ class DataValidation(object):
             )
 
             try:
-                result_df = combiner.generate_report(
+                result_df = _timed(
+                    "Generate report",
+                    combiner.generate_report,
                     pandas_client,
                     self.run_metadata,
                     pandas_client.table(combiner.DEFAULT_SOURCE),
