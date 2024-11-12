@@ -25,6 +25,7 @@ from data_validation import (
     clients,
     consts,
     state_manager,
+    exceptions,
 )
 from data_validation.config_manager import ConfigManager
 from data_validation.data_validation import DataValidation
@@ -222,8 +223,8 @@ def _get_comparison_config(
 ) -> List[dict]:
     col_list = (
         None
-        if config_manager.comparison_fields == "*"
-        else cli_tools.get_arg_list(config_manager.comparison_fields)
+        if args.comparison_fields == "*"
+        else cli_tools.get_arg_list(args.comparison_fields)
     )
     comparison_fields = config_manager.build_comp_fields(
         col_list,
@@ -391,9 +392,26 @@ def config_runner(args):
                 )
             config_file_names = cli_tools.list_validations(config_dir=args.config_dir)
             config_managers = []
+            errors = False
             for file in config_file_names:
                 config_managers = build_config_managers_from_yaml(args, file)
-                run_validations(args, config_managers)
+                try:
+                    logging.info(
+                        "Currently running the validation for YAML file: %s",
+                        file,
+                    )
+                    run_validations(args, config_managers)
+                except Exception as e:
+                    errors = True
+                    logging.error(
+                        "Error '%s' occurred while running config file %s. Skipping it for now.",
+                        str(e),
+                        file,
+                    )
+            if errors:
+                raise exceptions.ValidationException(
+                    "Some of the validations raised an exception"
+                )
     else:
         if args.kube_completions:
             logging.warning(
@@ -546,23 +564,7 @@ def run_validations(args, config_managers):
     """
     # TODO(issue/31): Add parallel execution logic
     for config_manager in config_managers:
-        if config_manager.config and consts.CONFIG_FILE in config_manager.config:
-            logging.info(
-                "Currently running the validation for YAML file: %s",
-                config_manager.config[consts.CONFIG_FILE],
-            )
-            try:
-                run_validation(
-                    config_manager, dry_run=args.dry_run, verbose=args.verbose
-                )
-            except Exception as e:
-                logging.error(
-                    "Error %s occurred while running config file %s. Skipping it for now.",
-                    str(e),
-                    config_manager.config[consts.CONFIG_FILE],
-                )
-        else:
-            run_validation(config_manager, dry_run=args.dry_run, verbose=args.verbose)
+        run_validation(config_manager, dry_run=args.dry_run, verbose=args.verbose)
 
 
 def store_yaml_config_file(args, config_managers):
