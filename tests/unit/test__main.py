@@ -18,7 +18,7 @@ import os
 from unittest import mock
 import pytest
 
-from data_validation import cli_tools, exceptions
+from data_validation import cli_tools, exceptions, config_manager, consts
 from data_validation import __main__ as main
 
 
@@ -35,47 +35,115 @@ CLI_ARGS = {
     "verbose": True,
 }
 
-CONFIG_RUNNER_ARGS_1 = {
+BASE_RUNNER_ARGS = {
     "verbose": False,
     "log_level": "INFO",
+    "dry_run": False,
     "command": "configs",
     "validation_config_cmd": "run",
-    "dry_run": False,
+    "kube_completions": True,
+}
+CONFIG_RUNNER_ARGS_1 = BASE_RUNNER_ARGS | {
     "config_file": "gs://pso-kokoro-resources/resources/test/unit/test__main/3validations/first.yaml",
     "config_dir": None,
-    "kube_completions": True,
 }
-CONFIG_RUNNER_ARGS_2 = {
-    "verbose": False,
-    "log_level": "INFO",
-    "dry_run": False,
-    "command": "configs",
-    "validation_config_cmd": "run",
-    "kube_completions": True,
+CONFIG_RUNNER_ARGS_2 = BASE_RUNNER_ARGS | {
     "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/3validations",
 }
-CONFIG_RUNNER_ARGS_3 = {
-    "verbose": False,
-    "log_level": "INFO",
-    "dry_run": False,
-    "command": "configs",
-    "kube_completions": True,
-    "validation_config_cmd": "run",
+CONFIG_RUNNER_ARGS_3 = BASE_RUNNER_ARGS | {
     "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/4partitions",
 }
-CONFIG_RUNNER_ARGS_4 = {
-    "verbose": False,
-    "log_level": "INFO",
-    "dry_run": False,
-    "command": "configs",
+CONFIG_RUNNER_ARGS_4 = CONFIG_RUNNER_ARGS_3 | {
     "kube_completions": False,
-    "validation_config_cmd": "run",
-    "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/4partitions",
 }
-
 CONFIG_RUNNER_EXCEPTION_TEXT = (
     "Error '{}' occurred while running config file {}. Skipping it for now."
 )
+VALIDATE_COLUMN_CONFIG = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "validate",
+    "validate_cmd": "column",
+    "dry_run": False,
+    consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
+    consts.CONFIG_SOURCE_CONN: TEST_CONN,
+    consts.CONFIG_TARGET_CONN: TEST_CONN,
+    consts.CONFIG_FILE: None,
+    consts.CONFIG_FILE_JSON: None,
+}
+BROKEN_VALIDATE_COLUMN_CONFIG_MISSING_COMMAND = {
+    k: v for k, v in VALIDATE_COLUMN_CONFIG.items() if k != "command"
+}  # as above without the command item
+BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND = VALIDATE_COLUMN_CONFIG | {
+    "command": "incorrectcommand"
+}  # as above with command item replaced
+VALIDATE_ROW_CONFIG = VALIDATE_COLUMN_CONFIG | {
+    "validate_cmd": "row",
+    consts.CONFIG_TYPE: consts.ROW_VALIDATION,
+}  # as above with 2 items replaced
+VALIDATE_CONFIG = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "configs",
+    "validation_config_cmd": "run",
+    "dry_run": False,
+    consts.CONFIG_TYPE: consts.ROW_VALIDATION,
+    consts.CONFIG_FILE: "test.yaml",
+    "config_dir": None,
+    "kube_completions": None,
+}
+CONNECTION_LIST_ARGS = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "connections",
+    "connect_cmd": "list",
+}
+CONNECTION_ADD_ARGS = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "connections",
+    "connect_cmd": "add",
+    "connect_type": "BigQuery",
+    consts.SECRET_MANAGER_TYPE: "gcp",
+    consts.SECRET_MANAGER_PROJECT_ID: "dummy-gcp-project",
+    consts.PROJECT_ID: "dummy-gcp-project",
+    consts.GOOGLE_SERVICE_ACCOUNT_KEY_PATH: None,
+    "connection_name": "dummy-bq-connection",
+}
+BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND = CONNECTION_ADD_ARGS | {
+    "command": "incorrectcommand"
+}  # as above with command item replaced
+FIND_TABLES_ARGS = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "find-tables",
+}
+DEPLOY_ARGS = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "deploy",
+}
+GENERATE_PARTITIONS_CONFIG = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "generate-table-partitions",
+    "partition_num": 9,
+    "parts_per_file": 5,
+    "tables_list": "my_schema.my_table",
+    consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
+}
+QUERY_CONFIG = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "query",
+    "conn": "dummy-bq-connection",
+    "query": "SELECT 1 AS TEST",
+}
+
+
+class MockIbisClient(object):
+    _source_type = "BigQuery"
+    name = "bigquery"
 
 
 @mock.patch(
@@ -207,3 +275,301 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     )
     assert mock_run.call_count == 4
     assert e_info.value.args[0] == "Some of the validations raised an exception"
+=======
+def run_main_and_check_exit_code(expected_code):
+    exit_code = main.main()
+    assert exit_code == expected_code
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_COLUMN_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            VALIDATE_COLUMN_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation")
+def test_exit_code_0_for_successful_column_validation(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_COLUMN_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            VALIDATE_COLUMN_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_column_validation(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**BROKEN_VALIDATE_COLUMN_CONFIG_MISSING_COMMAND),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            BROKEN_VALIDATE_COLUMN_CONFIG_MISSING_COMMAND,
+            MockIbisClient(),
+            MockIbisClient(),
+            verbose=False,
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation")
+def test_exit_code_1_for_malformed_input_config_missing_command(
+    mock_args, mock_build, mock_run
+):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND,
+            MockIbisClient(),
+            MockIbisClient(),
+            verbose=False,
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation")
+def test_exit_code_1_for_malformed_input_config_incorrect_command(
+    mock_args, mock_build, mock_run
+):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_ROW_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            VALIDATE_ROW_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation")
+def test_exit_code_0_for_successful_row_validation(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_ROW_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            VALIDATE_ROW_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_row_validation(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_yaml",
+    return_value=[
+        config_manager.ConfigManager(
+            VALIDATE_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation")
+def test_exit_code_0_for_successful_validation_config(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_yaml",
+    return_value=[
+        config_manager.ConfigManager(
+            VALIDATE_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.run_validation", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_validation_config(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**CONNECTION_LIST_ARGS),
+)
+@mock.patch("data_validation.cli_tools.list_connections")
+def test_exit_code_0_for_successful_connection_list(mock_args, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**CONNECTION_LIST_ARGS),
+)
+@mock.patch(
+    "data_validation.cli_tools.list_connections", side_effect=Exception("Boom!")
+)
+def test_exit_code_1_for_failed_connection_list(mock_args, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**CONNECTION_ADD_ARGS),
+)
+@mock.patch("data_validation.clients.get_data_client")
+def test_exit_code_0_for_successful_connection_add(mock_args, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**CONNECTION_ADD_ARGS),
+)
+@mock.patch("data_validation.clients.get_data_client", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_connection_add(mock_args, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND),
+)
+@mock.patch("data_validation.clients.get_data_client")
+def test_exit_code_1_for_malformed_input_connection_config_incorrect_command(
+    mock_args, mock_run
+):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**FIND_TABLES_ARGS),
+)
+@mock.patch("data_validation.__main__.find_tables_using_string_matching")
+def test_exit_code_0_for_successful_find_tables(mock_args, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**FIND_TABLES_ARGS),
+)
+@mock.patch(
+    "data_validation.__main__.find_tables_using_string_matching",
+    side_effect=Exception("Boom!"),
+)
+def test_exit_code_1_for_failed_find_tables(mock_args, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**DEPLOY_ARGS),
+)
+@mock.patch("data_validation.app.app.run")
+def test_exit_code_0_for_successful_deploy(mock_args, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**DEPLOY_ARGS),
+)
+@mock.patch("data_validation.app.app.run", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_deploy(mock_args, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**GENERATE_PARTITIONS_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            GENERATE_PARTITIONS_CONFIG,
+            MockIbisClient(),
+            MockIbisClient(),
+            verbose=False,
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.PartitionBuilder")
+def test_exit_code_0_for_successful_generate_partitions(
+    mock_args, mock_build, mock_run
+):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**GENERATE_PARTITIONS_CONFIG),
+)
+@mock.patch(
+    "data_validation.__main__.build_config_managers_from_args",
+    return_value=[
+        config_manager.ConfigManager(
+            GENERATE_PARTITIONS_CONFIG,
+            MockIbisClient(),
+            MockIbisClient(),
+            verbose=False,
+        )
+    ],
+)
+@mock.patch("data_validation.__main__.PartitionBuilder", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_generate_partitions(mock_args, mock_build, mock_run):
+    run_main_and_check_exit_code(1)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**QUERY_CONFIG),
+)
+@mock.patch("data_validation.clients.get_data_client")
+def test_exit_code_0_for_successful_query(mock_args, mock_run):
+    run_main_and_check_exit_code(0)
+
+
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**QUERY_CONFIG),
+)
+@mock.patch("data_validation.clients.get_data_client", side_effect=Exception("Boom!"))
+def test_exit_code_1_for_failed_query(mock_args, mock_run):
+    run_main_and_check_exit_code(1)
