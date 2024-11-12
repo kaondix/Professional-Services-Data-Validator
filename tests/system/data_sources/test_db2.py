@@ -161,7 +161,7 @@ def test_row_validation_core_types_auto_pks():
     row_validation_test(
         tables="db2inst1.dvt_core_types",
         tc="mock-conn",
-        hash="col_int8,col_int16",
+        hash="col_string",
         primary_keys=None,
     )
 
