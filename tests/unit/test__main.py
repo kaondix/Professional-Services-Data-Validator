@@ -275,7 +275,8 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     )
     assert mock_run.call_count == 4
     assert e_info.value.args[0] == "Some of the validations raised an exception"
-=======
+
+
 def run_main_and_check_exit_code(expected_code):
     exit_code = main.main()
     assert exit_code == expected_code

@@ -45,6 +45,7 @@ LOG_LEVEL_MAP = {
     "CRITICAL": logging.CRITICAL,
 }
 
+
 def _get_arg_config_file(args):
     """Return String YAML config file path."""
     if not args.config_file:
@@ -713,6 +714,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
