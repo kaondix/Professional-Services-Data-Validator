@@ -111,7 +111,7 @@ CONNECTION_ADD_ARGS = {
     "connection_name": "dummy-bq-connection",
 }
 BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND = CONNECTION_ADD_ARGS | {
-    "command": "incorrectcommand"
+    "connect_cmd": "incorrectconnectioncommand"
 }  # as above with command item replaced
 FIND_TABLES_ARGS = {
     "verbose": False,
@@ -277,11 +277,6 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     assert e_info.value.args[0] == "Some of the validations raised an exception"
 
 
-def run_main_and_check_exit_code(expected_code):
-    exit_code = main.main()
-    assert exit_code == expected_code
-
-
 @mock.patch(
     "argparse.ArgumentParser.parse_args",
     return_value=argparse.Namespace(**VALIDATE_COLUMN_CONFIG),
@@ -295,25 +290,10 @@ def run_main_and_check_exit_code(expected_code):
     ],
 )
 @mock.patch("data_validation.__main__.run_validation")
-def test_exit_code_0_for_successful_column_validation(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**VALIDATE_COLUMN_CONFIG),
-)
-@mock.patch(
-    "data_validation.__main__.build_config_managers_from_args",
-    return_value=[
-        config_manager.ConfigManager(
-            VALIDATE_COLUMN_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
-        )
-    ],
-)
-@mock.patch("data_validation.__main__.run_validation", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_column_validation(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_column_validation_with_mocked_run_validation(
+    mock_args, mock_build, mock_run
+):
+    main.main()
 
 
 @mock.patch(
@@ -332,10 +312,12 @@ def test_exit_code_1_for_failed_column_validation(mock_args, mock_build, mock_ru
     ],
 )
 @mock.patch("data_validation.__main__.run_validation")
-def test_exit_code_1_for_malformed_input_config_missing_command(
+def test_throws_for_malformed_input_config_missing_command(
     mock_args, mock_build, mock_run
 ):
-    run_main_and_check_exit_code(1)
+    with pytest.raises(Exception) as e_info:
+        main.main()
+    assert e_info.value.args[0] == "'Namespace' object has no attribute 'command'"
 
 
 @mock.patch(
@@ -354,10 +336,15 @@ def test_exit_code_1_for_malformed_input_config_missing_command(
     ],
 )
 @mock.patch("data_validation.__main__.run_validation")
-def test_exit_code_1_for_malformed_input_config_incorrect_command(
+def test_throws_for_malformed_input_config_incorrect_command(
     mock_args, mock_build, mock_run
 ):
-    run_main_and_check_exit_code(1)
+    with pytest.raises(ValueError) as e_info:
+        main.main()
+    assert (
+        e_info.value.args[0]
+        == "Positional Argument 'incorrectcommand' is not supported"
+    )
 
 
 @mock.patch(
@@ -373,25 +360,10 @@ def test_exit_code_1_for_malformed_input_config_incorrect_command(
     ],
 )
 @mock.patch("data_validation.__main__.run_validation")
-def test_exit_code_0_for_successful_row_validation(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**VALIDATE_ROW_CONFIG),
-)
-@mock.patch(
-    "data_validation.__main__.build_config_managers_from_args",
-    return_value=[
-        config_manager.ConfigManager(
-            VALIDATE_ROW_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
-        )
-    ],
-)
-@mock.patch("data_validation.__main__.run_validation", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_row_validation(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_row_validation_with_mocked_run_validation(
+    mock_args, mock_build, mock_run
+):
+    main.main()
 
 
 @mock.patch(
@@ -407,25 +379,10 @@ def test_exit_code_1_for_failed_row_validation(mock_args, mock_build, mock_run):
     ],
 )
 @mock.patch("data_validation.__main__.run_validation")
-def test_exit_code_0_for_successful_validation_config(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**VALIDATE_CONFIG),
-)
-@mock.patch(
-    "data_validation.__main__.build_config_managers_from_yaml",
-    return_value=[
-        config_manager.ConfigManager(
-            VALIDATE_CONFIG, MockIbisClient(), MockIbisClient(), verbose=False
-        )
-    ],
-)
-@mock.patch("data_validation.__main__.run_validation", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_validation_config(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_validation_config_with_mocked_run_validation(
+    mock_args, mock_build, mock_run
+):
+    main.main()
 
 
 @mock.patch(
@@ -433,19 +390,8 @@ def test_exit_code_1_for_failed_validation_config(mock_args, mock_build, mock_ru
     return_value=argparse.Namespace(**CONNECTION_LIST_ARGS),
 )
 @mock.patch("data_validation.cli_tools.list_connections")
-def test_exit_code_0_for_successful_connection_list(mock_args, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**CONNECTION_LIST_ARGS),
-)
-@mock.patch(
-    "data_validation.cli_tools.list_connections", side_effect=Exception("Boom!")
-)
-def test_exit_code_1_for_failed_connection_list(mock_args, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_connection_list_with_mocked_list_connections(mock_args, mock_run):
+    main.main()
 
 
 @mock.patch(
@@ -453,17 +399,8 @@ def test_exit_code_1_for_failed_connection_list(mock_args, mock_run):
     return_value=argparse.Namespace(**CONNECTION_ADD_ARGS),
 )
 @mock.patch("data_validation.clients.get_data_client")
-def test_exit_code_0_for_successful_connection_add(mock_args, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**CONNECTION_ADD_ARGS),
-)
-@mock.patch("data_validation.clients.get_data_client", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_connection_add(mock_args, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_connection_add_with_mocked_list_connections(mock_args, mock_run):
+    main.main()
 
 
 @mock.patch(
@@ -471,10 +408,15 @@ def test_exit_code_1_for_failed_connection_add(mock_args, mock_run):
     return_value=argparse.Namespace(**BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND),
 )
 @mock.patch("data_validation.clients.get_data_client")
-def test_exit_code_1_for_malformed_input_connection_config_incorrect_command(
+def test_throws_for_malformed_input_connection_config_incorrect_command(
     mock_args, mock_run
 ):
-    run_main_and_check_exit_code(1)
+    with pytest.raises(ValueError) as e_info:
+        main.main()
+    assert (
+        e_info.value.args[0]
+        == "Connections Argument 'incorrectconnectioncommand' is not supported"
+    )
 
 
 @mock.patch(
@@ -482,20 +424,8 @@ def test_exit_code_1_for_malformed_input_connection_config_incorrect_command(
     return_value=argparse.Namespace(**FIND_TABLES_ARGS),
 )
 @mock.patch("data_validation.__main__.find_tables_using_string_matching")
-def test_exit_code_0_for_successful_find_tables(mock_args, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**FIND_TABLES_ARGS),
-)
-@mock.patch(
-    "data_validation.__main__.find_tables_using_string_matching",
-    side_effect=Exception("Boom!"),
-)
-def test_exit_code_1_for_failed_find_tables(mock_args, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_find_tables_with_mock(mock_args, mock_run):
+    main.main()
 
 
 @mock.patch(
@@ -503,17 +433,8 @@ def test_exit_code_1_for_failed_find_tables(mock_args, mock_run):
     return_value=argparse.Namespace(**DEPLOY_ARGS),
 )
 @mock.patch("data_validation.app.app.run")
-def test_exit_code_0_for_successful_deploy(mock_args, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**DEPLOY_ARGS),
-)
-@mock.patch("data_validation.app.app.run", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_deploy(mock_args, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_deploy_with_mocked_app_run(mock_args, mock_run):
+    main.main()
 
 
 @mock.patch(
@@ -532,30 +453,10 @@ def test_exit_code_1_for_failed_deploy(mock_args, mock_run):
     ],
 )
 @mock.patch("data_validation.__main__.PartitionBuilder")
-def test_exit_code_0_for_successful_generate_partitions(
+def test_successful_generate_partitions_with_mocked_partition_builder(
     mock_args, mock_build, mock_run
 ):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**GENERATE_PARTITIONS_CONFIG),
-)
-@mock.patch(
-    "data_validation.__main__.build_config_managers_from_args",
-    return_value=[
-        config_manager.ConfigManager(
-            GENERATE_PARTITIONS_CONFIG,
-            MockIbisClient(),
-            MockIbisClient(),
-            verbose=False,
-        )
-    ],
-)
-@mock.patch("data_validation.__main__.PartitionBuilder", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_generate_partitions(mock_args, mock_build, mock_run):
-    run_main_and_check_exit_code(1)
+    main.main()
 
 
 @mock.patch(
@@ -563,14 +464,5 @@ def test_exit_code_1_for_failed_generate_partitions(mock_args, mock_build, mock_
     return_value=argparse.Namespace(**QUERY_CONFIG),
 )
 @mock.patch("data_validation.clients.get_data_client")
-def test_exit_code_0_for_successful_query(mock_args, mock_run):
-    run_main_and_check_exit_code(0)
-
-
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**QUERY_CONFIG),
-)
-@mock.patch("data_validation.clients.get_data_client", side_effect=Exception("Boom!"))
-def test_exit_code_1_for_failed_query(mock_args, mock_run):
-    run_main_and_check_exit_code(1)
+def test_successful_query_with_mocked_get_data_client(mock_args, mock_run):
+    main.main()

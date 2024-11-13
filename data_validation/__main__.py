@@ -686,35 +686,26 @@ def main():
         format="%(asctime)s-%(levelname)s: %(message)s",
         datefmt="%m/%d/%Y %I:%M:%S %p",
     )
-    try:
-        if args.command == "connections":
-            run_connections(args)
-        elif args.command == "configs":
-            run_validation_configs(args)
-        elif args.command == "find-tables":
-            print(find_tables_using_string_matching(args))
-        elif args.command == "query":
-            print(run_raw_query_against_connection(args))
-        elif args.command == "validate":
-            validate(args)
-        elif args.command == "generate-table-partitions":
-            cli_tools.check_no_yaml_files(args.partition_num, args.parts_per_file)
-            partition_and_store_config_files(args)
-        elif args.command == "deploy":
-            from data_validation import app
+    if args.command == "connections":
+        run_connections(args)
+    elif args.command == "configs":
+        run_validation_configs(args)
+    elif args.command == "find-tables":
+        print(find_tables_using_string_matching(args))
+    elif args.command == "query":
+        print(run_raw_query_against_connection(args))
+    elif args.command == "validate":
+        validate(args)
+    elif args.command == "generate-table-partitions":
+        cli_tools.check_no_yaml_files(args.partition_num, args.parts_per_file)
+        partition_and_store_config_files(args)
+    elif args.command == "deploy":
+        from data_validation import app
 
-            app.app.run(
-                debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080))
-            )
-        else:
-            raise ValueError(f"Positional Argument '{args.command}' is not supported")
-
-    except Exception as e:
-        logging.error(str(e))
-        return 1
-
-    return 0
+        app.app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    else:
+        raise ValueError(f"Positional Argument '{args.command}' is not supported")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
