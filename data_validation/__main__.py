@@ -230,11 +230,13 @@ def _get_comparison_config(args, config_manager: ConfigManager) -> List[dict]:
         args.exclude_columns,
     )
     # We can't have the PK columns in the comparison SQL twice therefore filter them out here if included.
-    comparison_fields = [
-        _
-        for _ in comparison_fields
-        if _ not in cli_tools.get_arg_list(args.primary_keys.casefold())
-    ]
+    primary_keys = cli_tools.get_arg_list(args.primary_keys.casefold())
+    comparison_fields = [_ for _ in comparison_fields if _ not in primary_keys]
+
+    if not comparison_fields and primary_keys:
+        return config_manager.build_config_comparison_fields(
+            primary_keys[:1], for_empty_comp_fields_validation=True
+        )
 
     # As per #1190, add rstrip for Teradata string comparison fields
     if (

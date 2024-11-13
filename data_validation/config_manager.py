@@ -625,8 +625,15 @@ class ConfigManager(object):
             return "bool"
         return None
 
-    def build_config_comparison_fields(self, fields, depth=None):
-        """Return list of field config objects."""
+    def build_config_comparison_fields(
+        self, fields, depth=None, for_empty_comp_fields_validation=False
+    ):
+        """Return list of field config objects.
+
+        for_empty_comp_fields_validation: True when we have a comp fields validation with no fields,
+            i.e. the primary keys are ALL columns. In this case we alias the fields indicating it is
+            just a dummy validation column.
+        """
         field_configs = []
         source_table = self.get_source_ibis_calculated_table()
         target_table = self.get_target_ibis_calculated_table()
@@ -639,6 +646,11 @@ class ConfigManager(object):
             cast_type = self._comp_field_cast(
                 source_table_schema, target_table_schema, field
             )
+            alias = (
+                "dvt_comp_fields_first_key_column"
+                if for_empty_comp_fields_validation
+                else field
+            )
             column_config = {
                 consts.CONFIG_SOURCE_COLUMN: casefold_source_columns.get(
                     field.casefold(), field
@@ -646,7 +658,7 @@ class ConfigManager(object):
                 consts.CONFIG_TARGET_COLUMN: casefold_target_columns.get(
                     field.casefold(), field
                 ),
-                consts.CONFIG_FIELD_ALIAS: field,
+                consts.CONFIG_FIELD_ALIAS: alias,
                 consts.CONFIG_CAST: cast_type,
             }
             field_configs.append(column_config)
