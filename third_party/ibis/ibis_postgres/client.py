@@ -79,11 +79,21 @@ def _metadata(self, query: str) -> sch.Schema:
     AND attnum > 0
     AND NOT attisdropped
     ORDER BY attnum"""
+
     with self.begin() as con:
-        con.exec_driver_sql(f"CREATE TEMPORARY VIEW {name} AS {query}")
-        type_info = con.execute(sa.text(type_info_sql).bindparams(raw_name=raw_name))
-        yield from ((col, _get_type(typestr)) for col, typestr in type_info)
-        con.exec_driver_sql(f"DROP VIEW IF EXISTS {name}")
+        pg_type = con.execute("SELECT oid, * FROM pg_type")
+        custom_query = con.execute(f"{query}")
+
+        breakpoint()
+
+        # base idea: https://stackoverflow.com/a/37481722
+        for t in custom_query.description:
+            print(f"{t.name}, {t.type_code}, {pg_type[t.type_code]}")
+
+        # con.exec_driver_sql(f"CREATE TEMPORARY VIEW {name} AS {query}")
+        # type_info = con.execute(sa.text(type_info_sql).bindparams(raw_name=raw_name))
+        # yield from ((col, _get_type(typestr)) for col, typestr in type_info)
+        # con.exec_driver_sql(f"DROP VIEW IF EXISTS {name}")
 
 
 def _get_type(typestr: str) -> dt.DataType:
