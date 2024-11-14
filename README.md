@@ -701,7 +701,7 @@ Since each row will be returned in the result set if is recommended recommended 
 subset of the table. The `--filters` and `--use-random-row` options can be used for this purpose.
 
 Please note that SHA256 is not a supported function on Teradata systems. If you wish to perform
-this comparison on Teradata you will need to [deploy a UDF to perform the conversion](https://github.com/akuroda/teradata-udf-sha2/blob/master/src/sha256.c).
+this comparison on Teradata you will need to [deploy a UDF to perform the conversion](teradata_udf_varbinary/README.md).
 
 The concat validation (`--concat '*'`) will do everything up until the hash. It will sanitize
 and concatenate the specified columns, and then value compare the results.
