@@ -24,8 +24,9 @@ from data_validation import (
     cli_tools,
     clients,
     consts,
-    state_manager,
     exceptions,
+    state_manager,
+    util,
 )
 from data_validation.config_manager import ConfigManager
 from data_validation.data_validation import DataValidation
@@ -335,22 +336,25 @@ def build_config_managers_from_args(
     args: Namespace, validate_cmd: str = None
 ) -> List[ConfigManager]:
     """Return a list of config managers ready to execute."""
-    configs = []
 
-    # Get pre build configs to build ConfigManager objects
-    pre_build_configs_list = cli_tools.get_pre_build_configs(args, validate_cmd)
+    def _build_configs():
+        configs = []
 
-    # Build a list of ConfigManager objects
-    for pre_build_configs in pre_build_configs_list:
-        config_manager = ConfigManager.build_config_manager(**pre_build_configs)
+        # Get pre build configs to build ConfigManager objects
+        pre_build_configs_list = cli_tools.get_pre_build_configs(args, validate_cmd)
 
-        # Append post build configs to ConfigManager object
-        config_manager = build_config_from_args(args, config_manager)
+        # Build a list of ConfigManager objects
+        for pre_build_configs in pre_build_configs_list:
+            config_manager = ConfigManager.build_config_manager(**pre_build_configs)
 
-        # Append ConfigManager object to configs list
-        configs.append(config_manager)
+            # Append post build configs to ConfigManager object
+            config_manager = build_config_from_args(args, config_manager)
 
-    return configs
+            # Append ConfigManager object to configs list
+            configs.append(config_manager)
+        return configs
+
+    return util.timed_call("Build config", _build_configs)
 
 
 def config_runner(args):
@@ -463,7 +467,7 @@ def run_raw_query_against_connection(args):
     return res
 
 
-def convert_config_to_yaml(args, config_managers):
+def convert_config_to_yaml(args, config_managers: list):
     """Return dict objects formatted for yaml validations.
 
     Args:
@@ -483,7 +487,7 @@ def convert_config_to_yaml(args, config_managers):
     return yaml_config
 
 
-def convert_config_to_json(config_managers) -> dict:
+def convert_config_to_json(config_managers: list) -> dict:
     """Return dict objects formatted for json validations.
     JSON configs correspond to ConfigManager objects and therefore can only correspond to
     one table validation.
@@ -503,7 +507,7 @@ def convert_config_to_json(config_managers) -> dict:
     return json_config
 
 
-def run_validation(config_manager, dry_run=False, verbose=False):
+def run_validation(config_manager: ConfigManager, dry_run=False, verbose=False):
     """Run a single validation.
 
     Args:
@@ -511,11 +515,24 @@ def run_validation(config_manager, dry_run=False, verbose=False):
         dry_run (bool): Print source and target SQL to stdout in lieu of validation.
         verbose (bool): Validation setting to log queries run.
     """
+    # Only use cached connection for SQLAlchemy backends that manage reconnects for us.
+    source_client = (
+        config_manager.source_client
+        if clients.is_sqlalchemy_backend(config_manager.source_client)
+        else None
+    )
+    target_client = (
+        config_manager.target_client
+        if clients.is_sqlalchemy_backend(config_manager.target_client)
+        else None
+    )
     with DataValidation(
         config_manager.config,
         validation_builder=None,
         result_handler=None,
         verbose=verbose,
+        source_client=source_client,
+        target_client=target_client,
     ) as validator:
 
         if dry_run:
