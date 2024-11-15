@@ -512,7 +512,7 @@ def run_validation(config_manager: ConfigManager, dry_run=False, verbose=False):
         dry_run (bool): Print source and target SQL to stdout in lieu of validation.
         verbose (bool): Validation setting to log queries run.
     """
-    # Only used cached connection for SQLAlchemy backends that manage reconnects for us.
+    # Only use cached connection for SQLAlchemy backends that manage reconnects for us.
     source_client = (
         config_manager.source_client
         if clients.is_sqlalchemy_backend(config_manager.source_client)
