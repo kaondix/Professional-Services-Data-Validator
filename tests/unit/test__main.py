@@ -35,30 +35,48 @@ CLI_ARGS = {
     "verbose": True,
 }
 
-BASE_RUNNER_ARGS = {
+CONFIG_RUNNER_ARGS_1 = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "configs",
+    "validation_config_cmd": "run",
+    "dry_run": False,
+    "config_file": "gs://pso-kokoro-resources/resources/test/unit/test__main/3validations/first.yaml",
+    "config_dir": None,
+    "kube_completions": True,
+}
+CONFIG_RUNNER_ARGS_2 = {
     "verbose": False,
     "log_level": "INFO",
     "dry_run": False,
     "command": "configs",
     "validation_config_cmd": "run",
     "kube_completions": True,
-}
-CONFIG_RUNNER_ARGS_1 = BASE_RUNNER_ARGS | {
-    "config_file": "gs://pso-kokoro-resources/resources/test/unit/test__main/3validations/first.yaml",
-    "config_dir": None,
-}
-CONFIG_RUNNER_ARGS_2 = BASE_RUNNER_ARGS | {
     "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/3validations",
 }
-CONFIG_RUNNER_ARGS_3 = BASE_RUNNER_ARGS | {
+CONFIG_RUNNER_ARGS_3 = {
+    "verbose": False,
+    "log_level": "INFO",
+    "dry_run": False,
+    "command": "configs",
+    "kube_completions": True,
+    "validation_config_cmd": "run",
     "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/4partitions",
 }
-CONFIG_RUNNER_ARGS_4 = CONFIG_RUNNER_ARGS_3 | {
+CONFIG_RUNNER_ARGS_4 = {
+    "verbose": False,
+    "log_level": "INFO",
+    "dry_run": False,
+    "command": "configs",
     "kube_completions": False,
+    "validation_config_cmd": "run",
+    "config_dir": "gs://pso-kokoro-resources/resources/test/unit/test__main/4partitions",
 }
+
 CONFIG_RUNNER_EXCEPTION_TEXT = (
     "Error '{}' occurred while running config file {}. Skipping it for now."
 )
+
 VALIDATE_COLUMN_CONFIG = {
     "verbose": False,
     "log_level": "INFO",
@@ -72,15 +90,40 @@ VALIDATE_COLUMN_CONFIG = {
     consts.CONFIG_FILE_JSON: None,
 }
 BROKEN_VALIDATE_COLUMN_CONFIG_MISSING_COMMAND = {
-    k: v for k, v in VALIDATE_COLUMN_CONFIG.items() if k != "command"
-}  # as above without the command item
-BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND = VALIDATE_COLUMN_CONFIG | {
-    "command": "incorrectcommand"
-}  # as above with command item replaced
-VALIDATE_ROW_CONFIG = VALIDATE_COLUMN_CONFIG | {
+    "verbose": False,
+    "log_level": "INFO",
+    "validate_cmd": "column",
+    "dry_run": False,
+    consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
+    consts.CONFIG_SOURCE_CONN: TEST_CONN,
+    consts.CONFIG_TARGET_CONN: TEST_CONN,
+    consts.CONFIG_FILE: None,
+    consts.CONFIG_FILE_JSON: None,
+}  # same as VALIDATE_COLUMN_CONFIG but without the command item
+BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "incorrectcommand",
+    "validate_cmd": "column",
+    "dry_run": False,
+    consts.CONFIG_TYPE: consts.COLUMN_VALIDATION,
+    consts.CONFIG_SOURCE_CONN: TEST_CONN,
+    consts.CONFIG_TARGET_CONN: TEST_CONN,
+    consts.CONFIG_FILE: None,
+    consts.CONFIG_FILE_JSON: None,
+}  # same as VALIDATE_COLUMN_CONFIG but with the command item replaced
+VALIDATE_ROW_CONFIG = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "validate",
     "validate_cmd": "row",
+    "dry_run": False,
     consts.CONFIG_TYPE: consts.ROW_VALIDATION,
-}  # as above with 2 items replaced
+    consts.CONFIG_SOURCE_CONN: TEST_CONN,
+    consts.CONFIG_TARGET_CONN: TEST_CONN,
+    consts.CONFIG_FILE: None,
+    consts.CONFIG_FILE_JSON: None,
+}  # same as VALIDATE_COLUMN_CONFIG but with 2 items replaced
 VALIDATE_CONFIG = {
     "verbose": False,
     "log_level": "INFO",
@@ -110,9 +153,18 @@ CONNECTION_ADD_ARGS = {
     consts.GOOGLE_SERVICE_ACCOUNT_KEY_PATH: None,
     "connection_name": "dummy-bq-connection",
 }
-BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND = CONNECTION_ADD_ARGS | {
-    "connect_cmd": "incorrectconnectioncommand"
-}  # as above with command item replaced
+BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND = {
+    "verbose": False,
+    "log_level": "INFO",
+    "command": "connections",
+    "connect_cmd": "incorrectconnectioncommand",
+    "connect_type": "BigQuery",
+    consts.SECRET_MANAGER_TYPE: "gcp",
+    consts.SECRET_MANAGER_PROJECT_ID: "dummy-gcp-project",
+    consts.PROJECT_ID: "dummy-gcp-project",
+    consts.GOOGLE_SERVICE_ACCOUNT_KEY_PATH: None,
+    "connection_name": "dummy-bq-connection",
+}  # same as CONNECTION_ADD_ARGS but with the command item replaced
 FIND_TABLES_ARGS = {
     "verbose": False,
     "log_level": "INFO",
