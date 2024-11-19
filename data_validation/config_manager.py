@@ -1178,7 +1178,7 @@ class ConfigManager(object):
 
         return casefold_source_columns
 
-    def default_primary_keys(self) -> list:
+    def auto_list_primary_keys(self) -> list:
         """Returns a list of primary key columns based on the source/target table.
 
         If neither source nor target systems have a primary key defined then [] is returned.
