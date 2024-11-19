@@ -99,6 +99,8 @@ ORA2PG_COLUMNS = [
     "col_blob",
     "col_clob",
     "col_nclob",
+    "col_json",
+    "col_jsonb",
 ]
 
 
@@ -302,6 +304,9 @@ def test_column_validation_oracle_to_postgres():
             if _ not in ("col_char_2", "col_nchar_2", "col_long_raw")
         ]
     )
+    count_cols = "col_json,col_jsonb"
+    sum_cols = ""
+    min_cols = ""
     column_validation_test(
         tc="pg-conn",
         tables="pso_data_validator.dvt_ora2pg_types",
