@@ -592,7 +592,7 @@ def _configure_row_parser(
         "-pk",
         required=is_custom_query,
         help=(
-            "Comma separated list of primary key columns 'col_a,col_b'" ""
+            "Comma separated list of primary key columns 'col_a,col_b'"
             if is_custom_query
             else " (defaults to table primary key if available)"
         ),
