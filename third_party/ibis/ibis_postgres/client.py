@@ -129,16 +129,18 @@ def list_schemas(self, like=None):
 def _list_primary_key_columns(self, database: str, table: str) -> list:
     """Return a list of primary key column names."""
     # From https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
-    list_pk_col_sql = f"""
+    list_pk_col_sql = """
         SELECT a.attname
         FROM   pg_index i
         JOIN   pg_attribute a ON a.attrelid = i.indrelid
                              AND a.attnum = ANY(i.indkey)
-        WHERE  i.indrelid = '{database}.{table}'::regclass
+        WHERE  i.indrelid = CAST(:raw_name AS regclass)
         AND    i.indisprimary
         """
     with self.begin() as con:
-        result = con.exec_driver_sql(list_pk_col_sql)
+        result = con.execute(
+            sa.text(list_pk_col_sql).bindparams(raw_name=f"{database}.{table}")
+        )
         return [_[0] for _ in result.cursor.fetchall()]
 
 
