@@ -329,10 +329,7 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
     assert e_info.value.args[0] == "Some of the validations raised an exception"
 
 
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**VALIDATE_COLUMN_CONFIG),
-)
+@mock.patch("data_validation.__main__.run_validation")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_args",
     return_value=[
@@ -341,17 +338,17 @@ def test_config_runner_4(mock_args, mock_build, mock_run, caplog):
         )
     ],
 )
-@mock.patch("data_validation.__main__.run_validation")
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_COLUMN_CONFIG),
+)
 def test_successful_column_validation_with_mocked_run_validation(
     mock_args, mock_build, mock_run
 ):
     main.main()
 
 
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**BROKEN_VALIDATE_COLUMN_CONFIG_MISSING_COMMAND),
-)
+@mock.patch("data_validation.__main__.run_validation")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_args",
     return_value=[
@@ -363,7 +360,10 @@ def test_successful_column_validation_with_mocked_run_validation(
         )
     ],
 )
-@mock.patch("data_validation.__main__.run_validation")
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**BROKEN_VALIDATE_COLUMN_CONFIG_MISSING_COMMAND),
+)
 def test_throws_for_malformed_input_config_missing_command(
     mock_args, mock_build, mock_run
 ):
@@ -372,10 +372,7 @@ def test_throws_for_malformed_input_config_missing_command(
     assert e_info.value.args[0] == "'Namespace' object has no attribute 'command'"
 
 
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND),
-)
+@mock.patch("data_validation.__main__.run_validation")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_args",
     return_value=[
@@ -387,7 +384,10 @@ def test_throws_for_malformed_input_config_missing_command(
         )
     ],
 )
-@mock.patch("data_validation.__main__.run_validation")
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**BROKEN_VALIDATE_COLUMN_CONFIG_INCORRECT_COMMAND),
+)
 def test_throws_for_malformed_input_config_incorrect_command(
     mock_args, mock_build, mock_run
 ):
@@ -399,10 +399,7 @@ def test_throws_for_malformed_input_config_incorrect_command(
     )
 
 
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**VALIDATE_ROW_CONFIG),
-)
+@mock.patch("data_validation.__main__.run_validation")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_args",
     return_value=[
@@ -411,17 +408,17 @@ def test_throws_for_malformed_input_config_incorrect_command(
         )
     ],
 )
-@mock.patch("data_validation.__main__.run_validation")
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_ROW_CONFIG),
+)
 def test_successful_row_validation_with_mocked_run_validation(
     mock_args, mock_build, mock_run
 ):
     main.main()
 
 
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**VALIDATE_CONFIG),
-)
+@mock.patch("data_validation.__main__.run_validation")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_yaml",
     return_value=[
@@ -430,7 +427,10 @@ def test_successful_row_validation_with_mocked_run_validation(
         )
     ],
 )
-@mock.patch("data_validation.__main__.run_validation")
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**VALIDATE_CONFIG),
+)
 def test_successful_validation_config_with_mocked_run_validation(
     mock_args, mock_build, mock_run
 ):
@@ -446,20 +446,20 @@ def test_successful_connection_list_with_mocked_list_connections(mock_args, mock
     main.main()
 
 
+@mock.patch("data_validation.clients.get_data_client")
 @mock.patch(
     "argparse.ArgumentParser.parse_args",
     return_value=argparse.Namespace(**CONNECTION_ADD_ARGS),
 )
-@mock.patch("data_validation.clients.get_data_client")
 def test_successful_connection_add_with_mocked_list_connections(mock_args, mock_run):
     main.main()
 
 
+@mock.patch("data_validation.clients.get_data_client")
 @mock.patch(
     "argparse.ArgumentParser.parse_args",
     return_value=argparse.Namespace(**BROKEN_CONNECTION_CONFIG_INCORRECT_COMMAND),
 )
-@mock.patch("data_validation.clients.get_data_client")
 def test_throws_for_malformed_input_connection_config_incorrect_command(
     mock_args, mock_run
 ):
@@ -471,28 +471,25 @@ def test_throws_for_malformed_input_connection_config_incorrect_command(
     )
 
 
+@mock.patch("data_validation.__main__.find_tables_using_string_matching")
 @mock.patch(
     "argparse.ArgumentParser.parse_args",
     return_value=argparse.Namespace(**FIND_TABLES_ARGS),
 )
-@mock.patch("data_validation.__main__.find_tables_using_string_matching")
 def test_successful_find_tables_with_mock(mock_args, mock_run):
     main.main()
 
 
+@mock.patch("data_validation.app.app.run")
 @mock.patch(
     "argparse.ArgumentParser.parse_args",
     return_value=argparse.Namespace(**DEPLOY_ARGS),
 )
-@mock.patch("data_validation.app.app.run")
 def test_successful_deploy_with_mocked_app_run(mock_args, mock_run):
     main.main()
 
 
-@mock.patch(
-    "argparse.ArgumentParser.parse_args",
-    return_value=argparse.Namespace(**GENERATE_PARTITIONS_CONFIG),
-)
+@mock.patch("data_validation.__main__.PartitionBuilder")
 @mock.patch(
     "data_validation.__main__.build_config_managers_from_args",
     return_value=[
@@ -504,17 +501,20 @@ def test_successful_deploy_with_mocked_app_run(mock_args, mock_run):
         )
     ],
 )
-@mock.patch("data_validation.__main__.PartitionBuilder")
+@mock.patch(
+    "argparse.ArgumentParser.parse_args",
+    return_value=argparse.Namespace(**GENERATE_PARTITIONS_CONFIG),
+)
 def test_successful_generate_partitions_with_mocked_partition_builder(
     mock_args, mock_build, mock_run
 ):
     main.main()
 
 
+@mock.patch("data_validation.clients.get_data_client")
 @mock.patch(
     "argparse.ArgumentParser.parse_args",
     return_value=argparse.Namespace(**QUERY_CONFIG),
 )
-@mock.patch("data_validation.clients.get_data_client")
 def test_successful_query_with_mocked_get_data_client(mock_args, mock_run):
     main.main()
