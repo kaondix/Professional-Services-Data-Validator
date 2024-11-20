@@ -313,12 +313,13 @@ def build_config_from_args(args: Namespace, config_manager: ConfigManager):
         )
 
         # Append primary_keys
-        primary_keys = (
-            cli_tools.get_arg_list(args.primary_keys)
-            or config_manager.auto_list_primary_keys()
-        )
+        primary_keys = cli_tools.get_arg_list(args.primary_keys)
+        if not primary_keys and config_manager.validation_type != consts.CUSTOM_QUERY:
+            primary_keys = config_manager.auto_list_primary_keys()
         if not primary_keys:
-            raise ValueError("--primary-keys argument is required for this validation")
+            raise ValueError(
+                "No primary keys were provided and neither the source or target tables have primary keys. Please include --primary-keys argument"
+            )
         primary_keys = [_.casefold() for _ in primary_keys]
         config_manager.append_primary_keys(
             config_manager.build_column_configs(primary_keys)
