@@ -164,14 +164,24 @@ class Backend(BaseAlchemyBackend):
             )
             return [_[0] for _ in result.cursor.fetchall()]
 
-    def raw_metadata(self, query) -> dict:
-        if (
-            re.search(r"^\s*SELECT\s", query, flags=re.MULTILINE | re.IGNORECASE)
-            is not None
-        ):
-            query = f"({query})"
+    def raw_metadata(
+        self, database: str = None, table: str = None, query: str = None
+    ) -> dict:
+        def strip_prefix(s: str):
+            if s.startswith("DB_TYPE_"):
+                return s[8:]
+            else:
+                return s
+
+        assert (database and table) or query, "We should never receive all args=None"
+        if database and table:
+            source = f'"{database}"."{table}"'.upper()
+        elif query:
+            source = f"({query})"
 
         with self.begin() as con:
-            result = con.exec_driver_sql(f"SELECT * FROM {query} t0 WHERE ROWNUM <= 1")
+            result = con.exec_driver_sql(f"SELECT * FROM {source} t0 WHERE ROWNUM <= 1")
             cursor = result.cursor
-            return {column[0]: column[1].name for column in cursor.description}
+            return {
+                column[0]: strip_prefix(column[1].name) for column in cursor.description
+            }

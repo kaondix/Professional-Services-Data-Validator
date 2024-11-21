@@ -1027,9 +1027,9 @@ class ConfigManager(object):
         if self._source_raw_data_types is None:
             if clients.is_oracle_client(self.source_client):
                 raw_data_types = self.source_client.raw_metadata(
-                    self.source_query
-                    if self.validation_type == consts.CUSTOM_QUERY
-                    else f"{self.source_schema}.{self.source_table}"
+                    database=self.source_schema,
+                    table=self.source_table,
+                    query=self.source_query,
                 )
                 self._source_raw_data_types = {
                     _.casefold(): raw_data_types[_] for _ in raw_data_types
@@ -1046,9 +1046,9 @@ class ConfigManager(object):
         if self._target_raw_data_types is None:
             if clients.is_oracle_client(self.target_client):
                 raw_data_types = self.target_client.raw_metadata(
-                    self.target_query
-                    if self.validation_type == consts.CUSTOM_QUERY
-                    else f"{self.target_schema}.{self.target_table}"
+                    database=self.target_schema,
+                    table=self.target_table,
+                    query=self.target_query,
                 )
                 self._target_raw_data_types = {
                     _.casefold(): raw_data_types[_] for _ in raw_data_types
