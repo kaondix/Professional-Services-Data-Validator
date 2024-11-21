@@ -23,7 +23,6 @@ data-validation connections add \
     --secret-manager-project-id <MY-PROJECT> \
     --connection-name bq BigQuery \
     --project-id 'dvt-project-id'
-
 ```
 
 ## List existing connections
@@ -80,6 +79,7 @@ data-validation connections add
     --connection-name CONN_NAME BigQuery                Connection name
     --project-id MY_PROJECT                             Project ID where BQ data resides
     [--google-service-account-key-path PATH_TO_SA_KEY]  Path to SA key
+    [--api-endpoint ENDPOINT_URI]                       BigQuery API endpoint
 ```
 
 ### User/Service account needs following BigQuery permissions to run DVT:
