@@ -1020,6 +1020,10 @@ class ConfigManager(object):
         return self._comparison_max_col_length
 
     def _get_source_raw_data_types(self) -> dict:
+        """Return a dict of column name: raw data type.
+
+        The raw data type is the source/target engine type, for example it might
+        be "NCLOB" when the Ibis type states "string"."""
         if self._source_raw_data_types is None:
             if clients.is_oracle_client(self.source_client):
                 raw_data_types = self.source_client.raw_metadata(
@@ -1035,6 +1039,10 @@ class ConfigManager(object):
         return self._source_raw_data_types
 
     def _get_target_raw_data_types(self) -> dict:
+        """Return a dict of column name: raw data type.
+
+        The raw data type is the source/target engine type, for example it might
+        be "NCLOB" when the Ibis type states "string"."""
         if self._target_raw_data_types is None:
             if clients.is_oracle_client(self.target_client):
                 raw_data_types = self.target_client.raw_metadata(
@@ -1049,7 +1057,7 @@ class ConfigManager(object):
                 self._target_raw_data_types = {}
         return self._target_raw_data_types
 
-    def _is_oracle_lob(self, casefold_column_name: str):
+    def _is_oracle_lob(self, casefold_column_name: str) -> bool:
         return bool(
             self._get_source_raw_data_types()
             .get(casefold_column_name, "")
@@ -1062,7 +1070,7 @@ class ConfigManager(object):
     def _exclude_oracle_lob_columns(self, casefold_column_names: list):
         """Remove LOB columns from validation to avoid ORA-00932 errors
 
-        Not using set() minus set() because want to retain the order of the list."""
+        Not using set() - set() because we want to retain the order of the list."""
         oracle_lob_cols = [_ for _ in casefold_column_names if self._is_oracle_lob(_)]
         if oracle_lob_cols:
             if self.verbose:
