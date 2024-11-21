@@ -163,3 +163,15 @@ class Backend(BaseAlchemyBackend):
                 list_pk_col_sql, parameters=(database.upper(), table.upper())
             )
             return [_[0] for _ in result.cursor.fetchall()]
+
+    def raw_metadata(self, query) -> dict:
+        if (
+            re.search(r"^\s*SELECT\s", query, flags=re.MULTILINE | re.IGNORECASE)
+            is not None
+        ):
+            query = f"({query})"
+
+        with self.begin() as con:
+            result = con.exec_driver_sql(f"SELECT * FROM {query} t0 WHERE ROWNUM <= 1")
+            cursor = result.cursor
+            return {column[0]: column[1].name for column in cursor.description}

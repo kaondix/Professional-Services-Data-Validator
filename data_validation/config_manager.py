@@ -66,6 +66,9 @@ class ConfigManager(object):
         if self.validation_type not in consts.CONFIG_TYPES:
             raise ValueError(f"Unknown Configuration Type: {self.validation_type}")
         self._comparison_max_col_length = None
+        # For some engines we need to know the actual raw data type rather than the Ibis canonical type.
+        self._source_raw_data_types = None
+        self._target_raw_data_types = None
 
     @property
     def config(self):
@@ -840,7 +843,12 @@ class ConfigManager(object):
         )
 
     def build_config_column_aggregates(
-        self, agg_type, arg_value, exclude_cols, supported_types, cast_to_bigint=False
+        self,
+        agg_type: str,
+        arg_value: list,
+        exclude_cols: bool,
+        supported_types: list,
+        cast_to_bigint=False,
     ):
         """Return list of aggregate objects of given agg_type."""
 
@@ -944,6 +952,12 @@ class ConfigManager(object):
                         f"Skipping {agg_type} on {column} due to data type: {column_type}"
                     )
                 continue
+            elif agg_type == "count" and self._is_oracle_lob(column):
+                if self.verbose:
+                    logging.info(
+                        f"Skipping {agg_type} on {column} due to Oracle LOB data type"
+                    )
+                continue
 
             if require_pre_agg_calc_field(
                 column_type, target_column_type, agg_type, cast_to_bigint
@@ -1007,6 +1021,34 @@ class ConfigManager(object):
                 ]
             )
         return self._comparison_max_col_length
+
+    def _get_source_raw_data_types(self) -> dict:
+        if self._source_raw_data_types is None:
+            if clients.is_oracle_client(self.source_client):
+                raw_data_types = self.source_client.raw_metadata(
+                    # TODO need a custom-query version
+                    f"{self.source_schema}.{self.source_table}"
+                )
+                self._source_raw_data_types = {
+                    _.casefold(): raw_data_types[_] for _ in raw_data_types
+                }
+            else:
+                self._source_raw_data_types = {}
+        return self._source_raw_data_types
+
+    def _get_target_raw_data_types(self) -> dict:
+        # TODO need a target equiv.
+        return {}
+
+    def _is_oracle_lob(self, casefold_column_name: str):
+        return bool(
+            self._get_source_raw_data_types()
+            .get(casefold_column_name, "")
+            .endswith("LOB")
+            or self._get_target_raw_data_types()
+            .get(casefold_column_name, "")
+            .endswith("LOB")
+        )
 
     def _strftime_format(
         self, column_type: Union[dt.Date, dt.Timestamp], client
