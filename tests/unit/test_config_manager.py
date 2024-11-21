@@ -152,6 +152,22 @@ class MockIbisClient(object):
         return MockIbisTable()
 
 
+class MockOracleClient(object):
+    _source_type = "Oracle"
+    name = "oracle"
+
+    def table(self, table, database=None):
+        return MockIbisTable()
+
+    def raw_metadata(self, query):
+        return {
+            "a": "NUMBER",
+            "b": "VARCHAR2",
+            "c": "DATE",
+            "d": "NCLOB",
+        }
+
+
 class MockIbisTable(object):
     def __init__(self):
         self.columns = ["a", "b", "c", "d"]
@@ -634,3 +650,19 @@ def test_build_comp_fields(module_under_test):
         True,
     )
     assert comparison_fields == {"b": "b", "d": "d"}
+
+
+@mock.patch(
+    "data_validation.config_manager.ConfigManager.get_target_ibis_calculated_table",
+    new=lambda x: MockIbisTable(),
+)
+def test_is_oracle_lob(module_under_test):
+    config_manager = module_under_test.ConfigManager(
+        SAMPLE_CONFIG, MockOracleClient(), MockOracleClient(), verbose=False
+    )
+    assert not config_manager._is_oracle_lob(
+        "a"
+    ), "Column a is not a LOB therefore this should be False"
+    assert config_manager._is_oracle_lob(
+        "d"
+    ), "Column d is a LOB therefore this should be True"

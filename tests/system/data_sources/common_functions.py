@@ -166,8 +166,8 @@ def schema_validation_test(
     tables="pso_data_validator.dvt_core_types",
     tc="bq-conn",
     exclusion_columns="id",
-    allow_list=None,
-    allow_list_file=None,
+    allow_list: str = None,
+    allow_list_file: str = None,
 ):
     """Generic schema validation test.
 

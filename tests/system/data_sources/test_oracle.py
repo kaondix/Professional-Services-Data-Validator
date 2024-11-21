@@ -239,8 +239,10 @@ def test_schema_validation_not_null_vs_nullable():
 def test_schema_validation_oracle_to_postgres():
     """Oracle to PostgreSQL schema validation"""
     schema_validation_test(
-        tables="pso_data_validator.dvt_core_types",
+        tables="pso_data_validator.dvt_ora2pg_types",
         tc="pg-conn",
+        # TODO We should be able to remove allow_list below when actioning issue-1338.
+        allow_list="string:json",
         allow_list_file="samples/allow_list/oracle_to_postgres.yaml",
     )
 
@@ -304,9 +306,6 @@ def test_column_validation_oracle_to_postgres():
             if _ not in ("col_char_2", "col_nchar_2", "col_long_raw")
         ]
     )
-    count_cols = "col_json,col_jsonb"
-    sum_cols = ""
-    min_cols = ""
     column_validation_test(
         tc="pg-conn",
         tables="pso_data_validator.dvt_ora2pg_types",
@@ -386,9 +385,6 @@ def test_row_validation_oracle_to_postgres():
             for _ in ORA2PG_COLUMNS
             if _
             not in (
-                "col_blob",
-                "col_clob",
-                "col_nclob",
                 "col_raw",
                 "col_long_raw",
                 "col_float32",
@@ -604,9 +600,6 @@ def test_custom_query_row_validation_oracle_to_postgres():
             for _ in ORA2PG_COLUMNS
             if _
             not in (
-                "col_blob",
-                "col_clob",
-                "col_nclob",
                 "col_raw",
                 "col_long_raw",
                 "col_float32",

@@ -864,13 +864,7 @@ class ConfigManager(object):
             ]:
                 return True
             elif column_type in ["binary", "!binary"]:
-                if agg_type == "count":
-                    # Oracle BLOB is invalid for use with SQL COUNT function.
-                    return bool(
-                        self.source_client.name == "oracle"
-                        or self.target_client.name == "oracle"
-                    )
-                else:
+                if agg_type != "count":
                     # Convert to length for any min/max/sum on binary columns.
                     return True
             elif cast_to_bigint and column_type in ["int32", "!int32"]:
@@ -953,6 +947,9 @@ class ConfigManager(object):
                     )
                 continue
             elif agg_type == "count" and self._is_oracle_lob(column):
+                # TODO Eventually we need to allow COUNT(Oracle LOB) by using a CASE expression:
+                #      COUNT(CASE WHEN clob_col IS NULL THEN NULL ELSE 1 END)
+                #      For now we skip them.
                 if self.verbose:
                     logging.info(
                         f"Skipping {agg_type} on {column} due to Oracle LOB data type"
@@ -1026,8 +1023,9 @@ class ConfigManager(object):
         if self._source_raw_data_types is None:
             if clients.is_oracle_client(self.source_client):
                 raw_data_types = self.source_client.raw_metadata(
-                    # TODO need a custom-query version
-                    f"{self.source_schema}.{self.source_table}"
+                    self.source_query
+                    if self.validation_type == consts.CUSTOM_QUERY
+                    else f"{self.source_schema}.{self.source_table}"
                 )
                 self._source_raw_data_types = {
                     _.casefold(): raw_data_types[_] for _ in raw_data_types
@@ -1037,8 +1035,19 @@ class ConfigManager(object):
         return self._source_raw_data_types
 
     def _get_target_raw_data_types(self) -> dict:
-        # TODO need a target equiv.
-        return {}
+        if self._target_raw_data_types is None:
+            if clients.is_oracle_client(self.target_client):
+                raw_data_types = self.target_client.raw_metadata(
+                    self.target_query
+                    if self.validation_type == consts.CUSTOM_QUERY
+                    else f"{self.target_schema}.{self.target_table}"
+                )
+                self._target_raw_data_types = {
+                    _.casefold(): raw_data_types[_] for _ in raw_data_types
+                }
+            else:
+                self._target_raw_data_types = {}
+        return self._target_raw_data_types
 
     def _is_oracle_lob(self, casefold_column_name: str):
         return bool(
@@ -1049,6 +1058,18 @@ class ConfigManager(object):
             .get(casefold_column_name, "")
             .endswith("LOB")
         )
+
+    def _exclude_oracle_lob_columns(self, casefold_column_names: list):
+        """Remove LOB columns from validation to avoid ORA-00932 errors
+
+        Not using set() minus set() because want to retain the order of the list."""
+        oracle_lob_cols = [_ for _ in casefold_column_names if self._is_oracle_lob(_)]
+        if oracle_lob_cols:
+            if self.verbose:
+                logging.info(f"Skipping Oracle LOB columns: {str(oracle_lob_cols)}")
+            return [_ for _ in casefold_column_names if _ not in oracle_lob_cols]
+        else:
+            return casefold_column_names
 
     def _strftime_format(
         self, column_type: Union[dt.Date, dt.Timestamp], client
@@ -1164,7 +1185,8 @@ class ConfigManager(object):
         col_names = []
         for i, calc in enumerate(self._get_order_of_operations(calc_type)):
             if i == 0:
-                previous_level = [x for x in casefold_source_columns.keys()]
+                previous_level = [_ for _ in casefold_source_columns.keys()]
+                previous_level = self._exclude_oracle_lob_columns(previous_level)
             else:
                 previous_level = [k for k, v in column_aliases.items() if v == i - 1]
             if calc in ["concat", "hash"]:
