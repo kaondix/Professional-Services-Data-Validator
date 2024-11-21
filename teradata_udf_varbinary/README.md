@@ -1,4 +1,4 @@
-# Update to Teradata UDF to support Accented Characters encoded in Latin1
+# Update to Teradata UDF to support Accented Characters encoded in Latin1his
 
 The Data Validation Tool uses a [teradata udf](https://github.com/akuroda/teradata-udf-sha2)
 written by Akira Kuroda that calculates the SHA-2 checksum that is offered as a builtin in other databases.
