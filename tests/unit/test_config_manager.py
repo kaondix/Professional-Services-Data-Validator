@@ -159,7 +159,7 @@ class MockOracleClient(object):
     def table(self, table, database=None):
         return MockIbisTable()
 
-    def raw_metadata(self, query):
+    def raw_metadata(self, database: str = None, table: str = None, query: str = None):
         return {
             "a": "NUMBER",
             "b": "VARCHAR2",
