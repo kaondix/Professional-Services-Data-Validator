@@ -1186,25 +1186,38 @@ def get_filters(filter_value: str) -> List[Dict]:
     return filter_config
 
 
-def get_result_handler(rc_value, sa_file=None):
+def get_result_handler(rc_value: str, sa_file=None) -> dict:
     """Returns dict of result handler config. Backwards compatible for JSON input.
 
     rc_value (str): Result config argument specified.
     sa_file (str): SA path argument specified.
     """
-    # TODO how to handle api_endpoint here?
     config = rc_value.split(".", 1)
-    if len(config) == 2:
-        result_handler = {
-            "type": "BigQuery",
-            "project_id": config[0],
-            "table_id": config[1],
-        }
-    else:
+    if len(config) != 2:
         raise ValueError(f"Unable to parse result handler config: `{rc_value}`")
 
+    # Check if the first part of the BQRH is a connection name.
+    mgr = state_manager.StateManager()
+    connections = mgr.list_connections()
+    if config[0] in connections:
+        # We received connection_name.bq_results_table
+        conn_from_file = get_connection(config[0])
+        result_handler = {
+            "type": "BigQuery",
+            consts.PROJECT_ID: conn_from_file["project_id"],
+            consts.TABLE_ID: config[1],
+            consts.API_ENDPOINT: conn_from_file.get("api_endpoint", None),
+        }
+    else:
+        # We received project_name.bq_results_table
+        result_handler = {
+            "type": "BigQuery",
+            consts.PROJECT_ID: config[0],
+            consts.TABLE_ID: config[1],
+        }
+
     if sa_file:
-        result_handler["google_service_account_key_path"] = sa_file
+        result_handler[consts.GOOGLE_SERVICE_ACCOUNT_KEY_PATH] = sa_file
 
     return result_handler
 

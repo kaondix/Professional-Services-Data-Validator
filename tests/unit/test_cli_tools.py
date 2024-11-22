@@ -426,22 +426,52 @@ def test_get_arg_list(test_input, expected):
     [
         (
             "project.dataset.table",
-            {"type": "BigQuery", "project_id": "project", "table_id": "dataset.table"},
+            {
+                "type": "BigQuery",
+                consts.PROJECT_ID: "project",
+                consts.TABLE_ID: "dataset.table",
+            },
         ),
         (
             "project.data.data.table",
             {
                 "type": "BigQuery",
-                "project_id": "project",
-                "table_id": "data.data.table",
+                consts.PROJECT_ID: "project",
+                consts.TABLE_ID: "data.data.table",
             },
         ),
     ],
 )
-def test_get_result_handler(test_input, expected):
-    """Test get result handler config dictionary."""
+def test_get_result_handler_by_project(test_input, expected):
+    """Test get result handler config dictionary for project.dataset.table format."""
     res = cli_tools.get_result_handler(test_input)
     assert res == expected
+
+
+def test_get_result_handler_by_conn_file(fs):
+    """Test get result handler config dictionary for connection.dataset.table format."""
+    # First create the connection.
+    parser = cli_tools.configure_arg_parser()
+    args = parser.parse_args(CLI_ADD_BQ_CONNECTION_ARGS)
+    conn = cli_tools.get_connection_config_from_args(args)
+    cli_tools.store_connection(args.connection_name, conn)
+
+    # Now check we can use it.
+    res = cli_tools.get_result_handler(f"{args.connection_name}.dataset.table")
+    assert res == {
+        "type": "BigQuery",
+        consts.PROJECT_ID: args.project_id,
+        consts.TABLE_ID: "dataset.table",
+        consts.API_ENDPOINT: args.api_endpoint,
+    }
+
+    # Plus check standard format still works.
+    res = cli_tools.get_result_handler("project.dataset.table")
+    assert res == {
+        "type": "BigQuery",
+        consts.PROJECT_ID: "project",
+        consts.TABLE_ID: "dataset.table",
+    }
 
 
 @pytest.mark.parametrize(
