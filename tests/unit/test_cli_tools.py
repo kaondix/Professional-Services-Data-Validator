@@ -17,7 +17,7 @@ import logging
 import pytest
 from unittest import mock
 
-from data_validation import cli_tools, consts
+from data_validation import cli_tools, consts, gcs_helper
 
 
 TEST_CONN = '{"source_type":"Example"}'
@@ -52,6 +52,18 @@ CLI_ADD_CONNECTION_BAD_ARGS = [
     "--bad-name",
     "test",
     "BigQuery",
+]
+
+CLI_ADD_BQ_CONNECTION_ARGS = [
+    "connections",
+    "add",
+    "--connection-name",
+    "test_with_endpoint",
+    "BigQuery",
+    "--project-id",
+    "example-project",
+    "--api-endpoint",
+    "https://mybq.p.googleapis.com",
 ]
 
 CLI_ADD_ORACLE_STD_CONNECTION_ARGS = [
@@ -104,8 +116,6 @@ TEST_VALIDATION_CONFIG = {
     ],
 }
 
-WRITE_SUCCESS_STRING = "Success! Config output written to"
-
 CLI_FIND_TABLES_ARGS = [
     "find-tables",
     "--source-conn",
@@ -157,17 +167,36 @@ def test_create_and_list_connections(caplog, fs):
     conn = cli_tools.get_connection_config_from_args(args)
     cli_tools.store_connection(args.connection_name, conn)
 
-    assert WRITE_SUCCESS_STRING in caplog.records[0].msg
+    assert gcs_helper.WRITE_SUCCESS_STRING in caplog.records[0].msg
 
-    # List Connection
     cli_tools.list_connections()
     assert "Connection Name: test : BigQuery" in caplog.records[1].msg
+
+    conn_from_file = cli_tools.get_connection("test")
+    assert not conn_from_file.get("api_endpoint", None)
 
 
 def test_bad_add_connection():
     with pytest.raises(SystemExit):
         parser = cli_tools.configure_arg_parser()
         _ = parser.parse_args(CLI_ADD_CONNECTION_BAD_ARGS)
+
+
+def test_create_bq_connection(caplog, fs):
+    caplog.set_level(logging.INFO)
+    # Create Connection
+    parser = cli_tools.configure_arg_parser()
+    args = parser.parse_args(CLI_ADD_BQ_CONNECTION_ARGS)
+    conn = cli_tools.get_connection_config_from_args(args)
+    cli_tools.store_connection(args.connection_name, conn)
+
+    assert gcs_helper.WRITE_SUCCESS_STRING in caplog.records[0].msg
+
+    cli_tools.list_connections()
+    assert "Connection Name: test_with_endpoint : BigQuery" in caplog.records[1].msg
+
+    conn_from_file = cli_tools.get_connection("test_with_endpoint")
+    assert conn_from_file["api_endpoint"] == "https://mybq.p.googleapis.com"
 
 
 @mock.patch(
@@ -206,7 +235,7 @@ def test_create_and_list_and_get_validations(caplog, fs):
     caplog.set_level(logging.INFO)
     # Create validation config file
     cli_tools.store_validation("example_validation.yaml", TEST_VALIDATION_CONFIG)
-    assert WRITE_SUCCESS_STRING in caplog.records[0].msg
+    assert gcs_helper.WRITE_SUCCESS_STRING in caplog.records[0].msg
 
     # List validation configs
     cli_tools.print_validations_in_dir()

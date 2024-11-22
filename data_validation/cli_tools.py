@@ -65,7 +65,10 @@ CONNECTION_SOURCE_FIELDS = {
     "BigQuery": [
         ["project_id", "GCP Project to use for BigQuery"],
         ["google_service_account_key_path", "(Optional) GCP SA Key Path"],
-        ["api_endpoint", "(Optional) GCP BigQuery API endpoint"],
+        [
+            "api_endpoint",
+            '(Optional) GCP BigQuery API endpoint (e.g. "https://mybq.p.googleapis.com")',
+        ],
     ],
     "Teradata": [
         ["host", "Desired Teradata host"],
@@ -126,7 +129,10 @@ CONNECTION_SOURCE_FIELDS = {
         ["instance_id", "ID of Spanner instance to connect to"],
         ["database_id", "ID of Spanner database (schema) to connect to"],
         ["google_service_account_key_path", "(Optional) GCP SA Key Path"],
-        ["api_endpoint", "(Optional) GCP Spanner API endpoint"],
+        [
+            "api_endpoint",
+            '(Optional) GCP Spanner API endpoint (e.g. "https://mycs.p.googleapis.com")',
+        ],
     ],
     "FileSystem": [
         ["table_name", "Table name to use as reference for file data"],
