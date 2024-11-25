@@ -1059,6 +1059,10 @@ class ConfigManager(object):
         return self._target_raw_data_types
 
     def _is_oracle_lob(self, casefold_column_name: str) -> bool:
+         """Checks if a column in either the source or target database is an Oracle LOB (Large Object) data type. 
+ 
+        Args:
+          casefold_column_name: The case-insensitive name of the column to check."""
         return bool(
             self._get_source_raw_data_types()
             .get(casefold_column_name, "")
