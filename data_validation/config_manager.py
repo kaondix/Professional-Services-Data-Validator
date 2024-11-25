@@ -946,6 +946,7 @@ class ConfigManager(object):
                         f"Skipping {agg_type} on {column} due to data type: {column_type}"
                     )
                 continue
+            # Oracle LOB columns are invalid for use with SQL COUNT function.
             elif agg_type == "count" and self._is_oracle_lob(column):
                 # TODO Eventually we need to allow COUNT(Oracle LOB) by using a CASE expression:
                 #      COUNT(CASE WHEN clob_col IS NULL THEN NULL ELSE 1 END)
