@@ -746,7 +746,13 @@ class ConfigManager(object):
         return calculated_config
 
     def append_pre_agg_calc_field(
-        self, source_column, target_column, agg_type, column_type, column_position
+        self,
+        source_column: str,
+        target_column: str,
+        agg_type: str,
+        column_type: str,
+        target_column_type: str,
+        column_position: int,
     ) -> dict:
         """Append calculated field for length(string | binary) or epoch_seconds(timestamp) for preprocessing before column validation aggregation."""
         depth, cast_type = 0, None
@@ -755,6 +761,13 @@ class ConfigManager(object):
 
         elif column_type in ["binary", "!binary"]:
             calc_func = "byte_length"
+
+        elif column_type in ["uuid", "!uuid"] or target_column_type in [
+            "uuid",
+            "!uuid",
+        ]:
+            # Cast to a known DVT format for a UUID in a string.
+            calc_func = "uuid_string"
 
         elif column_type in ["timestamp", "!timestamp", "date", "!date"]:
             if (
@@ -879,6 +892,12 @@ class ConfigManager(object):
             ):
                 # For timestamps: do not convert to epoch seconds for min/max
                 return True
+            elif (
+                column_type in ["uuid", "!uuid"]
+                or target_column_type in ["uuid", "!uuid"]
+            ) and agg_type in ("min", "max"):
+                # Cast to a known DVT format for a UUID in a string.
+                return True
             return False
 
         aggregate_configs = []
@@ -953,6 +972,7 @@ class ConfigManager(object):
                     casefold_target_columns[column],
                     agg_type,
                     column_type,
+                    target_column_type,
                     column_position,
                 )
             else:

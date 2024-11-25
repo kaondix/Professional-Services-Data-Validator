@@ -747,3 +747,17 @@ CREATE TABLE pso_data_validator.dvt_bool
 COMMENT ON TABLE pso_data_validator.dvt_bool IS 'Integration test table used to test boolean data type, especially in non-boolean columns.';
 INSERT INTO pso_data_validator.dvt_bool VALUES (1,true,true,true,true);
 INSERT INTO pso_data_validator.dvt_bool VALUES (2,false,false,false,false);
+
+DROP TABLE pso_data_validator.dvt_uuid_id;
+CREATE TABLE pso_data_validator.dvt_uuid_id
+(   id        uuid NOT NULL PRIMARY KEY
+,   col_uuid  uuid
+,   col_data  varchar(10));
+COMMENT ON TABLE pso_data_validator.dvt_uuid_id IS 'Integration test table used to test UUID data type.';
+INSERT INTO pso_data_validator.dvt_uuid_id VALUES
+(uuid('387bdc3b218443b28ec23ac791c5b0f1')
+,uuid('387bdc3b218443b28ec23ac791c5b0f1')
+,'A'),
+(uuid('397bdc3b218443b28ec23ac791c5b0f1')
+,uuid('397bdc3b218443b28ec23ac791c5b0f1')
+,'B');

@@ -693,3 +693,19 @@ COMMENT ON TABLE pso_data_validator.dvt_bool IS 'Integration test table used to 
 INSERT INTO pso_data_validator.dvt_bool VALUES (1,1,1,'1','Y');
 INSERT INTO pso_data_validator.dvt_bool VALUES (2,0,0,'0','N');
 COMMIT;
+
+DROP TABLE pso_data_validator.dvt_uuid_id;
+CREATE TABLE pso_data_validator.dvt_uuid_id
+(   id        RAW(16) NOT NULL PRIMARY KEY
+,   col_uuid  RAW(16)
+,   col_data  VARCHAR2(10));
+COMMENT ON TABLE pso_data_validator.dvt_uuid_id IS 'Integration test table used to test RAW data type as UUID.';
+INSERT INTO pso_data_validator.dvt_uuid_id VALUES
+(HEXTORAW('387BDC3B218443B28EC23AC791C5B0F1')
+,HEXTORAW('387BDC3B218443B28EC23AC791C5B0F1')
+,'A');
+INSERT INTO pso_data_validator.dvt_uuid_id VALUES
+(HEXTORAW('397BDC3B218443B28EC23AC791C5B0F1')
+,HEXTORAW('397BDC3B218443B28EC23AC791C5B0F1')
+,'B');
+COMMIT;

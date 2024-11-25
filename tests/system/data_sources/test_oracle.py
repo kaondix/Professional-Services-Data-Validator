@@ -770,3 +770,54 @@ def test_row_validation_comp_fields_bool_to_postgres():
         tc="pg-conn",
         comp_fields="col_bool_dec,col_bool_int,col_bool_ch1,col_bool_chy",
     )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_column_validation_uuid_oracle_to_postgres():
+    column_validation_test(
+        tc="pg-conn",
+        tables="pso_data_validator.dvt_uuid_id",
+        count_cols="*",
+        # sum_cols="*",
+        # min_cols="*",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_row_validation_uuid_hash_oracle_to_postgres():
+    row_validation_test(
+        tables="pso_data_validator.dvt_uuid_id",
+        tc="pg-conn",
+        hash="*",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_row_validation_uuid_comp_oracle_to_postgres():
+    row_validation_test(
+        tables="pso_data_validator.dvt_uuid_id",
+        tc="pg-conn",
+        comp_fields="*",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_row_validation_uuid_rr_oracle_to_postgres():
+    row_validation_test(
+        tables="pso_data_validator.dvt_uuid_id",
+        tc="pg-conn",
+        hash="*",
+        use_randow_row=True,
+    )
