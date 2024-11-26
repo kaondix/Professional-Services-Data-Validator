@@ -20,7 +20,6 @@ import sqlalchemy as sa
 from ibis import util
 from ibis.backends.postgres import Backend as PostgresBackend
 from ibis.backends.postgres.datatypes import _BRACKETS, _parse_numeric, _type_mapping
-import logging
 
 
 def do_connect(
@@ -69,42 +68,18 @@ def do_connect(
 
 
 def _metadata(self, query: str) -> sch.Schema:
-    raw_name = util.guid()
-    name = self._quote(raw_name)
-    type_info_sql = """\
-    SELECT
-    attname,
-    format_type(atttypid, atttypmod) AS type
-    FROM pg_attribute
-    WHERE attrelid = CAST(:raw_name AS regclass)
-    AND attnum > 0
-    AND NOT attisdropped
-    ORDER BY attnum"""
     with self.begin() as con:
-        con.execute("SAVEPOINT XYZ")
-        try:
-            con.exec_driver_sql(f"CREATE TEMPORARY VIEW {name} AS {query}")
-            type_info = con.execute(
-                sa.text(type_info_sql).bindparams(raw_name=raw_name)
-            )
-        except sa.exc.ProgrammingError as e:
-            con.execute("ROLLBACK TO SAVEPOINT XYZ")
-            cur = con.exec_driver_sql(f"select * from ({query}) t0 limit 0")
-            qry_cols = [
-                f"('{column.name}'::text, {column.type_code}, {column.table_column})"
-                for column in cur.cursor.description
-            ]
-            type_info = con.exec_driver_sql(
-                f"""select name, format_type(type_code, NULL)
-                                               from unnest(array[{','.join(qry_cols)}])
-                                                   as col_list(name text, type_code int, col_ord int) order by col_ord"""
-            )
-        else:
-            con.execute("RELEASE SAVEPOINT XYZ")
-        test_out = [(col, _get_type(typestr)) for col, typestr in type_info]
-        logging.info(f"Columns and types {test_out}")
-        yield from test_out
-        con.exec_driver_sql(f"DROP VIEW IF EXISTS {name}")
+        cur = con.exec_driver_sql(f"select * from ({query}) t0 limit 0")
+        qry_cols = [
+            f"('{column.name}'::text, {column.type_code}, {column.table_column})"
+            for column in cur.cursor.description
+        ]
+        type_info = con.exec_driver_sql(
+            f"""select name, format_type(type_code, NULL)
+                    from unnest(array[{','.join(qry_cols)}])
+                    as col_list(name text, type_code int, col_ord int) order by col_ord"""
+        )
+    yield from ((col, _get_type(typestr)) for col, typestr in type_info)
 
 
 def _get_type(typestr: str) -> dt.DataType:
