@@ -90,8 +90,7 @@ class Backend(BaseAlchemyBackend):
                 raise NotImplementedError(
                     "cx_Oracle is currently the only supported driver"
                 )
-            dsn = """(description= (address=(protocol={})(host={})(port={}))
-            (connect_data=(service_name={})))""".format(
+            dsn = """(description=(address=(protocol={})(host={})(port={}))(connect_data=(service_name={})))""".format(
                 protocol, host, port, database
             )
             sa_url = sa.engine.url.URL.create(
@@ -118,6 +117,8 @@ class Backend(BaseAlchemyBackend):
             # Therefore the ugly hardcoding of 128 kicks the can down the road and unblocks a customer
             # who is working with Oracle 11g and a max identifier length of 30.
             max_identifier_length=128,
+            # Pessimistic disconnect handling
+            pool_pre_ping=True,
         )
         try:
             # Identify the session in Oracle as DVT, no-op if this fails.
@@ -145,3 +146,20 @@ class Backend(BaseAlchemyBackend):
             result = con.exec_driver_sql(f"SELECT * FROM {query} t0 WHERE ROWNUM <= 1")
             cursor = result.cursor
             yield from ((column[0], _get_type(column)) for column in cursor.description)
+
+    def list_primary_key_columns(self, database: str, table: str) -> list:
+        """Return a list of primary key column names."""
+        list_pk_col_sql = """
+            SELECT cc.column_name
+            FROM all_cons_columns cc
+            INNER JOIN all_constraints c ON (cc.owner = c.owner AND cc.constraint_name = c.constraint_name AND cc.table_name = c.table_name)
+            WHERE c.owner = :1
+            AND c.table_name = :2
+            AND c.constraint_type = 'P'
+            ORDER BY cc.position
+        """
+        with self.begin() as con:
+            result = con.exec_driver_sql(
+                list_pk_col_sql, parameters=(database.upper(), table.upper())
+            )
+            return [_[0] for _ in result.cursor.fetchall()]

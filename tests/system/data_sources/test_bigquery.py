@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import logging
 import os
 from unittest import mock
 
@@ -30,6 +31,7 @@ from data_validation import (
 )
 from data_validation.query_builder import random_row_builder
 from data_validation.query_builder.query_builder import QueryBuilder
+from data_validation.result_handlers.bigquery import BQRH_WRITE_MESSAGE
 from tests.system.data_sources.common_functions import (
     partition_table_test,
     partition_query_test,
@@ -39,6 +41,7 @@ from tests.system.data_sources.common_functions import (
     row_validation_test,
     custom_query_validation_test,
 )
+from tests.system.result_handlers.test_bigquery import create_bigquery_results_table
 
 
 PROJECT_ID = os.environ["PROJECT_ID"]
@@ -1249,6 +1252,24 @@ def test_row_validation_core_types(mock_conn):
     "data_validation.state_manager.StateManager.get_connection_config",
     return_value=BQ_CONN,
 )
+def test_row_validation_core_types_auto_pks(mock_conn):
+    """Test auto population of -pks from BigQuery - expect an exception.
+
+    Expects:
+      ValueError: --primary-keys argument is required for this validation
+    """
+    with pytest.raises(ValueError):
+        row_validation_test(
+            tc="mock-conn",
+            hash="col_int8,col_int16",
+            primary_keys=None,
+        )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    return_value=BQ_CONN,
+)
 def test_custom_query_validation_core_types(mock_conn):
     """BigQuery to BigQuery dvt_core_types custom-query validation"""
     custom_query_validation_test(tc="mock-conn", count_cols="*")
@@ -1341,3 +1362,21 @@ def test_row_validation_identifiers(mock_conn):
         tc="mock-conn",
         hash="*",
     )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    return_value=BQ_CONN,
+)
+def test_bq_result_handler(mock_conn, bigquery_client, bigquery_dataset_id, caplog):
+    """Test BigQuery result handler using dvt_core_types schema validation."""
+    table_id = f"{bigquery_dataset_id}.test_bq_result_handler"
+    create_bigquery_results_table(bigquery_client, table_id)
+    caplog.set_level(logging.INFO)
+    schema_validation_test(
+        tables="pso_data_validator.dvt_core_types",
+        tc="mock-conn",
+        filter_status=None,
+        bq_result_handler=f"{PROJECT_ID}.{table_id}",
+    )
+    assert any(_ for _ in caplog.records if BQRH_WRITE_MESSAGE in _.msg)

@@ -219,7 +219,9 @@ def _get_calculated_config(args, config_manager: ConfigManager) -> List[dict]:
     return calculated_configs
 
 
-def _get_comparison_config(args, config_manager: ConfigManager) -> List[dict]:
+def _get_comparison_config(
+    args, config_manager: ConfigManager, primary_keys: list
+) -> List[dict]:
     col_list = (
         None
         if args.comparison_fields == "*"
@@ -230,11 +232,7 @@ def _get_comparison_config(args, config_manager: ConfigManager) -> List[dict]:
         args.exclude_columns,
     )
     # We can't have the PK columns in the comparison SQL twice therefore filter them out here if included.
-    comparison_fields = [
-        _
-        for _ in comparison_fields
-        if _ not in cli_tools.get_arg_list(args.primary_keys.casefold())
-    ]
+    comparison_fields = [_ for _ in comparison_fields if _ not in primary_keys]
 
     # As per #1190, add rstrip for Teradata string comparison fields
     if (
@@ -314,17 +312,24 @@ def build_config_from_args(args: Namespace, config_manager: ConfigManager):
             _get_calculated_config(args, config_manager)
         )
 
-        # Append Comparison fields
-        if args.comparison_fields:
-            config_manager.append_comparison_fields(
-                _get_comparison_config(args, config_manager)
-            )
-
         # Append primary_keys
         primary_keys = cli_tools.get_arg_list(args.primary_keys)
+        if not primary_keys and config_manager.validation_type != consts.CUSTOM_QUERY:
+            primary_keys = config_manager.auto_list_primary_keys()
+        if not primary_keys:
+            raise ValueError(
+                "No primary keys were provided and neither the source or target tables have primary keys. Please include --primary-keys argument"
+            )
+        primary_keys = [_.casefold() for _ in primary_keys]
         config_manager.append_primary_keys(
             config_manager.build_column_configs(primary_keys)
         )
+
+        # Append Comparison fields
+        if args.comparison_fields:
+            config_manager.append_comparison_fields(
+                _get_comparison_config(args, config_manager, primary_keys)
+            )
 
     return config_manager
 
@@ -464,7 +469,7 @@ def run_raw_query_against_connection(args):
     return res
 
 
-def convert_config_to_yaml(args, config_managers):
+def convert_config_to_yaml(args, config_managers: list):
     """Return dict objects formatted for yaml validations.
 
     Args:
@@ -484,7 +489,7 @@ def convert_config_to_yaml(args, config_managers):
     return yaml_config
 
 
-def convert_config_to_json(config_managers) -> dict:
+def convert_config_to_json(config_managers: list) -> dict:
     """Return dict objects formatted for json validations.
     JSON configs correspond to ConfigManager objects and therefore can only correspond to
     one table validation.
@@ -504,7 +509,7 @@ def convert_config_to_json(config_managers) -> dict:
     return json_config
 
 
-def run_validation(config_manager, dry_run=False, verbose=False):
+def run_validation(config_manager: ConfigManager, dry_run=False, verbose=False):
     """Run a single validation.
 
     Args:
@@ -512,11 +517,24 @@ def run_validation(config_manager, dry_run=False, verbose=False):
         dry_run (bool): Print source and target SQL to stdout in lieu of validation.
         verbose (bool): Validation setting to log queries run.
     """
+    # Only use cached connection for SQLAlchemy backends that manage reconnects for us.
+    source_client = (
+        config_manager.source_client
+        if clients.is_sqlalchemy_backend(config_manager.source_client)
+        else None
+    )
+    target_client = (
+        config_manager.target_client
+        if clients.is_sqlalchemy_backend(config_manager.target_client)
+        else None
+    )
     with DataValidation(
         config_manager.config,
         validation_builder=None,
         result_handler=None,
         verbose=verbose,
+        source_client=source_client,
+        target_client=target_client,
     ) as validator:
 
         if dry_run:

@@ -479,11 +479,13 @@ class ConfigManager(object):
                 )
             else:
                 credentials = None
+            api_endpoint = self.result_handler_config.get(consts.API_ENDPOINT)
             return BigQueryResultHandler.get_handler_for_project(
                 project_id,
                 self.filter_status,
                 table_id=table_id,
                 credentials=credentials,
+                api_endpoint=api_endpoint,
                 text_format=self._config.get(consts.CONFIG_FORMAT, "table"),
             )
         else:
@@ -1177,3 +1179,20 @@ class ConfigManager(object):
         )
 
         return casefold_source_columns
+
+    def auto_list_primary_keys(self) -> list:
+        """Returns a list of primary key columns based on the source/target table.
+
+        If neither source nor target systems have a primary key defined then [] is returned.
+        """
+        assert (
+            self.validation_type != consts.CUSTOM_QUERY
+        ), "Custom query validations should not be able to reach this method"
+        primary_keys = self.source_client.list_primary_key_columns(
+            self.source_schema, self.source_table
+        )
+        if not primary_keys:
+            primary_keys = self.target_client.list_primary_key_columns(
+                self.target_schema, self.target_table
+            )
+        return primary_keys or []
