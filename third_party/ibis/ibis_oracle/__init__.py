@@ -169,6 +169,9 @@ class Backend(BaseAlchemyBackend):
     ) -> dict:
         """Partner method to _metadata that retains raw data type information instead of converting to Ibis types.
 
+        This works in the same way as _metadata by running a query over the DVT source, either schema.table or a
+        custom query, and fetching the first row. From the cursor we can detect data types of the row's columns.
+
         Returns:
             dict: A map of column name to datatype name str.
         """
