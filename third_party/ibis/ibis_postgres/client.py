@@ -71,13 +71,18 @@ def _metadata(self, query: str) -> sch.Schema:
     with self.begin() as con:
         cur = con.exec_driver_sql(f"select * from ({query}) t0 limit 0")
         qry_cols = [
-            f"('{column.name}'::text, {column.type_code}, {column.table_column})"
-            for column in cur.cursor.description
+            f"('{column.name}'::text, {column.type_code},"
+            + f"{column.table_oid if column.table_oid else 'NULL'}::int,"
+            + f"{column.table_column if column.table_column else 'NULL'}::int, {idx})"
+            for idx, column in enumerate(cur.cursor.description)
         ]
         type_info = con.exec_driver_sql(
-            f"""select name, format_type(type_code, NULL)
+            f"""select name, CASE WHEN t0.attrelid is NULL
+                                THEN format_type(t0.type_code, NULL)
+                                ELSE format_type(t1.atttypid, t1.atttypmod) END as type
                     from unnest(array[{','.join(qry_cols)}])
-                    as col_list(name text, type_code int, col_ord int) order by col_ord"""
+                    as t0(name text, type_code int, attrelid int, attnum int, col_ord int)
+                    left join pg_attribute t1 using (attrelid, attnum) order by col_ord"""
         )
     yield from ((col, _get_type(typestr)) for col, typestr in type_info)
 
