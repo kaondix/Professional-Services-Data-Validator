@@ -91,7 +91,9 @@ except Exception:
     db2_connect = _raise_missing_client_error("pip install ibm_db_sa")
 
 
-def get_google_bigquery_client(project_id, credentials=None, api_endpoint=None):
+def get_google_bigquery_client(
+    project_id: str, credentials=None, api_endpoint: str = None
+):
     info = client_info.get_http_client_info()
     job_config = bigquery.QueryJobConfig(
         connection_properties=[bigquery.ConnectionProperty("time_zone", "UTC")]
@@ -108,7 +110,9 @@ def get_google_bigquery_client(project_id, credentials=None, api_endpoint=None):
     )
 
 
-def get_bigquery_client(project_id, dataset_id="", credentials=None, api_endpoint=None):
+def get_bigquery_client(
+    project_id: str, dataset_id: str = "", credentials=None, api_endpoint: str = None
+):
     google_client = get_google_bigquery_client(
         project_id, credentials=credentials, api_endpoint=api_endpoint
     )
@@ -284,10 +288,10 @@ def get_data_client(connection_config):
             consts.GOOGLE_SERVICE_ACCOUNT_KEY_PATH
         )
         if key_path:
-            decrypted_connection_config[
-                "credentials"
-            ] = google.oauth2.service_account.Credentials.from_service_account_file(
-                key_path
+            decrypted_connection_config["credentials"] = (
+                google.oauth2.service_account.Credentials.from_service_account_file(
+                    key_path
+                )
             )
 
     if source_type not in CLIENT_LOOKUP:
