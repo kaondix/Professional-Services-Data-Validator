@@ -1074,9 +1074,8 @@ class ConfigManager(object):
         )
 
     def _exclude_oracle_lob_columns(self, casefold_column_names: list):
-        """Remove LOB columns from validation to avoid ORA-00932 errors
-
-        Not using set() - set() because we want to retain the order of the list."""
+        """Remove LOB columns from validation to avoid ORA-00932 errors."""
+        # Not using set() minus set() below because we want to retain the order of the list."""
         oracle_lob_cols = [_ for _ in casefold_column_names if self._is_oracle_lob(_)]
         if oracle_lob_cols:
             if self.verbose:
