@@ -1027,7 +1027,7 @@ class ConfigManager(object):
         be "NCLOB" when the Ibis type states "string"."""
         if self._source_raw_data_types is None:
             if clients.is_oracle_client(self.source_client):
-                raw_data_types = self.source_client.raw_metadata(
+                raw_data_types = self.source_client.raw_column_metadata(
                     database=self.source_schema,
                     table=self.source_table,
                     query=self.source_query,
@@ -1046,7 +1046,7 @@ class ConfigManager(object):
         be "NCLOB" when the Ibis type states "string"."""
         if self._target_raw_data_types is None:
             if clients.is_oracle_client(self.target_client):
-                raw_data_types = self.target_client.raw_metadata(
+                raw_data_types = self.target_client.raw_column_metadata(
                     database=self.target_schema,
                     table=self.target_table,
                     query=self.target_query,

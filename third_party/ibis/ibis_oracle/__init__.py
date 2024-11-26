@@ -164,9 +164,15 @@ class Backend(BaseAlchemyBackend):
             )
             return [_[0] for _ in result.cursor.fetchall()]
 
-    def raw_metadata(
+    def raw_column_metadata(
         self, database: str = None, table: str = None, query: str = None
     ) -> dict:
+        """Partner method to _metadata that retains raw data type information instead of converting to Ibis types.
+
+        Returns:
+            dict: A map of column name to datatype name str.
+        """
+
         def strip_prefix(s: str):
             if s.startswith("DB_TYPE_"):
                 return s[8:]
