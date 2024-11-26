@@ -314,6 +314,22 @@ def test_column_validation_time_table_to_bigquery():
     "data_validation.state_manager.StateManager.get_connection_config",
     new=mock_get_connection_config,
 )
+def test_column_validation_dvt_binary_to_bigquery():
+    """Teradata to BigQuery dvt_binary column validation"""
+    column_validation_test(
+        tc="bq-conn",
+        tables="udf.dvt_binary=pso_data_validator.dvt_binary",
+        count_cols="*",
+        sum_cols="*",
+        min_cols="*",
+        max_cols="*",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
 def test_row_validation_time_table():
     """Teradata to BigQuery dvt_time_table row validation."""
     row_validation_test(

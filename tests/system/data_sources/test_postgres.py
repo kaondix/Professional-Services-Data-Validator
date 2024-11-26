@@ -666,6 +666,22 @@ def test_column_validation_core_types_to_bigquery():
     "data_validation.state_manager.StateManager.get_connection_config",
     new=mock_get_connection_config,
 )
+def test_column_validation_dvt_binary_to_bigquery():
+    """PostgreSQL to BigQuery dvt_binary column validation"""
+    column_validation_test(
+        tc="bq-conn",
+        tables="pso_data_validator.dvt_binary",
+        count_cols="*",
+        sum_cols="*",
+        min_cols="*",
+        max_cols="*",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
 def test_row_validation_pg_types():
     """Test row hash validation on most PostgreSQL scalar data types.
     Actual values are not well tested because this is PostgreSQL to PostgreSQL, this is shaking
