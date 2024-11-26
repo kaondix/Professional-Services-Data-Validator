@@ -64,7 +64,7 @@ class BigQueryResultHandler(object):
                 Explicit credentials to use in case default credentials
                 aren't working properly.
             status_list (list): provided status to filter the results with
-            api_endpoint (str): provided status to filter the results with
+            api_endpoint (str): BigQuery API endpoint (e.g. https://mybq.p.googleapis.com)
             text_format (str, optional):
                 This allows the user to influence the text results written via logger.debug.
                 See: https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/871
