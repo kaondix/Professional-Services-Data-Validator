@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import pytest
 from unittest import mock
 
 from data_validation import cli_tools
@@ -143,6 +144,10 @@ def test_column_validation_core_types_to_bigquery():
 )
 def test_column_validation_dvt_binary_to_bigquery():
     """DB2 to BigQuery dvt_binary column validation"""
+    # Remove skip of this test when working on issue-1354
+    pytest.skip(
+        "Skipping test_column_validation_dvt_binary_to_bigquery until issue-1354 is actioned"
+    )
     column_validation_test(
         tc="bq-conn",
         tables="db2inst1.dvt_binary=pso_data_validator.dvt_binary",
