@@ -65,6 +65,10 @@ CONNECTION_SOURCE_FIELDS = {
     "BigQuery": [
         ["project_id", "GCP Project to use for BigQuery"],
         ["google_service_account_key_path", "(Optional) GCP SA Key Path"],
+        [
+            "api_endpoint",
+            '(Optional) GCP BigQuery API endpoint (e.g. "https://mybq.p.googleapis.com")',
+        ],
     ],
     "Teradata": [
         ["host", "Desired Teradata host"],
@@ -125,6 +129,10 @@ CONNECTION_SOURCE_FIELDS = {
         ["instance_id", "ID of Spanner instance to connect to"],
         ["database_id", "ID of Spanner database (schema) to connect to"],
         ["google_service_account_key_path", "(Optional) GCP SA Key Path"],
+        [
+            "api_endpoint",
+            '(Optional) GCP Spanner API endpoint (e.g. "https://mycs.p.googleapis.com")',
+        ],
     ],
     "FileSystem": [
         ["table_name", "Table name to use as reference for file data"],
@@ -169,6 +177,12 @@ CONNECTION_SOURCE_FIELDS = {
         ["driver", "Driver link in DB2 to connect to (default ibm_db_sa)"],
     ],
 }
+
+VALIDATE_HELP_TEXT = "Run a validation and optionally store to config"
+VALIDATE_COLUMN_HELP_TEXT = "Run a column validation"
+VALIDATE_ROW_HELP_TEXT = "Run a row validation"
+VALIDATE_SCHEMA_HELP_TEXT = "Run a schema validation"
+VALIDATE_CUSTOM_QUERY_HELP_TEXT = "Run a custom query validation"
 
 
 def _check_custom_query_args(parser: argparse.ArgumentParser, parsed_args: Namespace):
@@ -471,9 +485,7 @@ def _configure_database_specific_parsers(parser):
 
 def _configure_validate_parser(subparsers):
     """Configure arguments to run validations."""
-    validate_parser = subparsers.add_parser(
-        "validate", help="Run a validation and optionally store to config"
-    )
+    validate_parser = subparsers.add_parser("validate", help=VALIDATE_HELP_TEXT)
 
     validate_parser.add_argument(
         "--dry-run",
@@ -485,22 +497,22 @@ def _configure_validate_parser(subparsers):
     validate_subparsers = validate_parser.add_subparsers(dest="validate_cmd")
 
     column_parser = validate_subparsers.add_parser(
-        "column", help="Run a column validation"
+        "column", help=VALIDATE_COLUMN_HELP_TEXT
     )
     _configure_column_parser(column_parser)
 
-    row_parser = validate_subparsers.add_parser("row", help="Run a row validation")
+    row_parser = validate_subparsers.add_parser("row", help=VALIDATE_ROW_HELP_TEXT)
     optional_arguments = row_parser.add_argument_group("optional arguments")
     required_arguments = row_parser.add_argument_group("required arguments")
     _configure_row_parser(row_parser, optional_arguments, required_arguments)
 
     schema_parser = validate_subparsers.add_parser(
-        "schema", help="Run a schema validation"
+        "schema", help=VALIDATE_SCHEMA_HELP_TEXT
     )
     _configure_schema_parser(schema_parser)
 
     custom_query_parser = validate_subparsers.add_parser(
-        "custom-query", help="Run a custom query validation"
+        "custom-query", help=VALIDATE_CUSTOM_QUERY_HELP_TEXT
     )
     _configure_custom_query_parser(custom_query_parser)
 
@@ -514,6 +526,15 @@ def _configure_row_parser(
 ):
     """Configure arguments to run row level validations."""
     # Group optional arguments
+    optional_arguments.add_argument(
+        "--primary-keys",
+        "-pk",
+        help=(
+            "Comma separated list of primary key columns 'col_a,col_b', "
+            "when not specified the value will be inferred from the source or target table if available"
+        ),
+    )
+
     optional_arguments.add_argument(
         "--threshold",
         "-th",
@@ -585,14 +606,6 @@ def _configure_row_parser(
             required=True,
             help="Comma separated tables list in the form 'schema.table=target_schema.target_table'",
         )
-
-    # Group required arguments
-    required_arguments.add_argument(
-        "--primary-keys",
-        "-pk",
-        required=True,
-        help="Comma separated list of primary key columns 'col_a,col_b'",
-    )
 
     # Group for mutually exclusive required arguments. Either must be supplied
     mutually_exclusive_arguments = required_arguments.add_mutually_exclusive_group(
@@ -1173,24 +1186,38 @@ def get_filters(filter_value: str) -> List[Dict]:
     return filter_config
 
 
-def get_result_handler(rc_value, sa_file=None):
+def get_result_handler(rc_value: str, sa_file=None) -> dict:
     """Returns dict of result handler config. Backwards compatible for JSON input.
 
     rc_value (str): Result config argument specified.
     sa_file (str): SA path argument specified.
     """
     config = rc_value.split(".", 1)
-    if len(config) == 2:
-        result_handler = {
-            "type": "BigQuery",
-            "project_id": config[0],
-            "table_id": config[1],
-        }
-    else:
+    if len(config) != 2:
         raise ValueError(f"Unable to parse result handler config: `{rc_value}`")
 
+    # Check if the first part of the BQRH is a connection name.
+    mgr = state_manager.StateManager()
+    connections = mgr.list_connections()
+    if config[0] in connections:
+        # We received connection_name.bq_results_table
+        conn_from_file = get_connection(config[0])
+        result_handler = {
+            "type": "BigQuery",
+            consts.PROJECT_ID: conn_from_file["project_id"],
+            consts.TABLE_ID: config[1],
+            consts.API_ENDPOINT: conn_from_file.get("api_endpoint", None),
+        }
+    else:
+        # We received project_name.bq_results_table
+        result_handler = {
+            "type": "BigQuery",
+            consts.PROJECT_ID: config[0],
+            consts.TABLE_ID: config[1],
+        }
+
     if sa_file:
-        result_handler["google_service_account_key_path"] = sa_file
+        result_handler[consts.GOOGLE_SERVICE_ACCOUNT_KEY_PATH] = sa_file
 
     return result_handler
 

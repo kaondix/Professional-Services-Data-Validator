@@ -14,6 +14,7 @@
 
 from typing import Any, Mapping, Optional, Tuple
 
+from google.api_core import client_options
 import google.cloud.spanner as cs
 import ibis.expr.schema as sch
 import ibis.expr.types as ir
@@ -39,6 +40,7 @@ class Backend(BaseSQLBackend):
         database_id: str = None,
         project_id: str = None,
         credentials=None,
+        api_endpoint: str = None,
     ) -> None:
 
         self.spanner_client = spanner.Client(
@@ -50,7 +52,12 @@ class Backend(BaseSQLBackend):
             self.data_instance,
             self.dataset,
         ) = parse_instance_and_dataset(instance_id, database_id)
-        self.client = cs.Client()
+
+        options = None
+        if api_endpoint:
+            options = client_options.ClientOptions(api_endpoint=api_endpoint)
+
+        self.client = cs.Client(client_options=options)
 
     def _parse_instance_and_dataset(self, dataset):
         if not dataset and not self.dataset:
@@ -213,6 +220,11 @@ class Backend(BaseSQLBackend):
 
     def fetch_from_cursor():
         pass
+
+    def list_primary_key_columns(self, database: str, table: str) -> list:
+        """Return a list of primary key column names."""
+        # TODO: Related to issue-1253, it's not clear if this is possible, we should revisit if it becomes a requirement.
+        return None
 
 
 def parse_instance_and_dataset(
