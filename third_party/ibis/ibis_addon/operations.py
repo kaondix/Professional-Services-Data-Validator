@@ -31,6 +31,7 @@ import ibis.expr.operations as ops
 import ibis.expr.rules as rlz
 import pandas as pd
 import sqlalchemy as sa
+from ibis.backends.base.sql.alchemy import BaseAlchemyBackend
 from ibis.backends.base.sql.alchemy.registry import _cast as sa_fixed_cast
 from ibis.backends.base.sql.alchemy.registry import fixed_arity as sa_fixed_arity
 from ibis.backends.base.sql.alchemy.translator import AlchemyExprTranslator
@@ -618,12 +619,20 @@ def execute_epoch_seconds_new(op, data, **kwargs):
         return epoch_series
 
 
+def _list_tables(self, like=None, database=None) -> list:
+    """Override of BaseAlchemyBackend.list_tables that does not include views in the result."""
+    tables = self.inspector.get_table_names(schema=database)
+    return self._filter_with_like(tables, like)
+
+
 execute_epoch_seconds = execute_epoch_seconds_new
 
 BinaryValue.byte_length = compile_binary_length
 
 NumericValue.to_char = compile_to_char
 TemporalValue.to_char = compile_to_char
+
+BaseAlchemyBackend.list_tables = _list_tables
 
 BigQueryExprTranslator._registry[HashBytes] = format_hashbytes_bigquery
 BigQueryExprTranslator._registry[RawSQL] = format_raw_sql
