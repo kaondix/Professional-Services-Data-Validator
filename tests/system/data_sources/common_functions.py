@@ -160,6 +160,9 @@ def find_tables_assertions(command_output: str):
     # Assert that a couple of known tables are in the map.
     assert "dvt_core_types" in [_["table_name"] for _ in output_dict]
     assert "dvt_core_types" in [_["target_table_name"] for _ in output_dict]
+    # Assert that known view is not in the map.
+    assert "dvt_core_types_vw" not in [_["table_name"] for _ in output_dict]
+    assert "dvt_core_types_vw" not in [_["target_table_name"] for _ in output_dict]
 
 
 def schema_validation_test(
