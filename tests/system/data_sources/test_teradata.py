@@ -18,9 +18,10 @@ from unittest import mock
 import pytest
 import pathlib
 
-from data_validation import cli_tools, data_validation, consts
+from data_validation import cli_tools, data_validation, consts, find_tables
 from tests.system.data_sources.common_functions import (
     binary_key_assertions,
+    find_tables_assertions,
     id_type_test_assertions,
     null_not_null_assertions,
     row_validation_many_columns_test,
@@ -32,6 +33,7 @@ from tests.system.data_sources.common_functions import (
     column_validation_test,
     custom_query_validation_test,
 )
+from tests.system.data_sources.consts import DVT_CORE_TYPES_COLUMNS
 from tests.system.data_sources.test_bigquery import BQ_CONN
 
 TERADATA_USER = os.getenv("TERADATA_USER", "udf")
@@ -285,7 +287,18 @@ def test_column_validation_core_types():
 )
 def test_column_validation_core_types_to_bigquery():
     """Teradata to BigQuery dvt_core_types column validation"""
-    cols = "col_int8,col_int16,col_int32,col_int64,col_dec_20,col_dec_38,col_dec_10_2,col_float64,col_varchar_30,col_char_2,col_string,col_date,col_datetime"
+    cols = ",".join(
+        [
+            _
+            for _ in DVT_CORE_TYPES_COLUMNS
+            if _
+            not in (
+                "id",
+                "col_float32",
+                "col_tstz",
+            )
+        ]
+    )
     column_validation_test(
         tc="bq-conn",
         tables="udf.dvt_core_types=pso_data_validator.dvt_core_types",
@@ -307,6 +320,24 @@ def test_column_validation_time_table_to_bigquery():
         tables="udf.dvt_time_table=pso_data_validator.dvt_time_table",
         # Unlike other temporal types, count is the only column validation supported for time
         count_cols="col_time",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_column_validation_view_core_types_vw():
+    """Teradata to Teradata view dvt_core_types_vw column validation"""
+    column_validation_test(
+        tc="mock-conn",
+        tables="udf.dvt_core_types_vw",
+        count_cols="*",
+        sum_cols="*",
+        min_cols="*",
+        max_cols="*",
+        filters="id>0 AND col_int8>0",
+        grouped_columns="col_varchar_30",
     )
 
 
@@ -613,6 +644,27 @@ def test_custom_query_row_hash_validation_core_types_to_bigquery():
         source_query="select id,col_int64,COL_VARCHAR_30,col_date from udf.dvt_core_types",
         target_query="select id,col_int64,col_varchar_30,COL_DATE from pso_data_validator.dvt_core_types",
         hash="col_int64,col_varchar_30,col_date",
+    )
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_find_tables():
+    """Teradata to Teradata test of find-tables command."""
+    parser = cli_tools.configure_arg_parser()
+    args = parser.parse_args(
+        [
+            "find-tables",
+            "-sc=mock-conn",
+            "-tc=mock-conn",
+            "--allowed-schemas=udfs",
+        ]
+    )
+    output = find_tables.find_tables_using_string_matching(args)
+    find_tables_assertions(
+        output, expected_source_schema="udfs", expected_target_schema="udfs"
     )
 
 

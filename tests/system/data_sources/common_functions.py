@@ -147,7 +147,12 @@ def row_validation_many_columns_test(
         assert len(df) == 0
 
 
-def find_tables_assertions(command_output: str):
+def find_tables_assertions(
+    command_output: str,
+    expected_source_schema: str = "pso_data_validator",
+    expected_target_schema: str = "pso_data_validator",
+    check_for_view: bool = True,
+):
     assert isinstance(command_output, str)
     assert command_output
     output_dict = json.loads(command_output)
@@ -155,14 +160,15 @@ def find_tables_assertions(command_output: str):
     assert isinstance(output_dict, list)
     assert isinstance(output_dict[0], dict)
     assert len(output_dict) > 1
-    assert all(_["schema_name"] == "pso_data_validator" for _ in output_dict)
-    assert all(_["target_schema_name"] == "pso_data_validator" for _ in output_dict)
+    assert all(_["schema_name"] == expected_source_schema for _ in output_dict)
+    assert all(_["target_schema_name"] == expected_target_schema for _ in output_dict)
     # Assert that a couple of known tables are in the map.
     assert "dvt_core_types" in [_["table_name"] for _ in output_dict]
     assert "dvt_core_types" in [_["target_table_name"] for _ in output_dict]
-    # Assert that known view is not in the map.
-    assert "dvt_core_types_vw" not in [_["table_name"] for _ in output_dict]
-    assert "dvt_core_types_vw" not in [_["target_table_name"] for _ in output_dict]
+    if check_for_view:
+        # Assert that known view is not in the map.
+        assert "dvt_core_types_vw" not in [_["table_name"] for _ in output_dict]
+        assert "dvt_core_types_vw" not in [_["target_table_name"] for _ in output_dict]
 
 
 def schema_validation_test(
