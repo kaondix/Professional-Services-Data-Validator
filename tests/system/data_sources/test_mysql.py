@@ -245,7 +245,15 @@ def test_column_validation_core_types():
 )
 def test_column_validation_core_types_to_bigquery():
     """MySQL to BigQuery dvt_core_types column validation"""
-    cols = ",".join([_ for _ in DVT_CORE_TYPES_COLUMNS if _ not in ("id")])
+    # TODO Change --sum, --min and --max options to include col_char_2 when issue-842 is complete.
+    # We've excluded col_float32 because BigQuery does not have an exact same type and float32/64 are lossy and cannot be compared.
+    cols = ",".join(
+        [
+            _
+            for _ in DVT_CORE_TYPES_COLUMNS
+            if _ not in ("id", "col_float32", "col_char_2")
+        ]
+    )
     column_validation_test(
         tc="bq-conn",
         filters="id>0 AND col_int8>0",
