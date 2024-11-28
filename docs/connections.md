@@ -14,15 +14,24 @@ To do so simply add the GCS path to the environment i.e
 ## Using GCP Secret Manager
 DVT supports [Google Cloud Secret Manager](https://cloud.google.com/secret-manager) for storing and referencing secrets in your connection configuration.
 
-If the secret-manager flags are present, the remaining connection flags should reference secret names instead of the secret itself. For example,
-the following BigQuery connection references a secret with name 'dvt-project-id' stored in project MY-PROJECT.
+If the secret-manager flags are present, any of the remaining connection flags can reference secret names instead of the secret itself.
 
+Example 1: A BigQuery connection referencing a secret with name "dvt-project-id" stored in project `my-project`:
 ```
 data-validation connections add \
     --secret-manager-type GCP \
-    --secret-manager-project-id <MY-PROJECT> \
+    --secret-manager-project-id my-project \
     --connection-name bq BigQuery \
-    --project-id 'dvt-project-id'
+    --project-id "dvt-project-id"
+```
+
+Example 2: An entire Oracle URL stored as a secret with name "dvt-url-secret" stored in project `my-project`:
+```
+data-validation connections add \
+    --secret-manager-type GCP \
+    --secret-manager-project-id my-project \
+    --connection-name ora_uat Oracle \
+    --url="dvt-url-secret"
 ```
 
 ## List existing connections
