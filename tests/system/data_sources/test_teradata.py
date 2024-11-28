@@ -659,12 +659,12 @@ def test_find_tables():
             "find-tables",
             "-sc=mock-conn",
             "-tc=mock-conn",
-            "--allowed-schemas=udfs",
+            "--allowed-schemas=udf",
         ]
     )
     output = find_tables.find_tables_using_string_matching(args)
     find_tables_assertions(
-        output, expected_source_schema="udfs", expected_target_schema="udfs"
+        output, expected_source_schema="udf", expected_target_schema="udf"
     )
 
 
