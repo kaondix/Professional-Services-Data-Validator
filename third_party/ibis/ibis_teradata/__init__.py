@@ -94,6 +94,7 @@ class Backend(BaseSQLBackend):
         SELECT * FROM DBC.Tables
         WHERE DatabaseName LIKE '%{database_like}%'
         AND TableName LIKE '%{table_like}%'
+        AND TableKind = 'T'
     """
 
     def list_tables(self, like=None, database=None):
