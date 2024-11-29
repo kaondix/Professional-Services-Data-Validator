@@ -81,7 +81,7 @@ def _metadata(self, query: str) -> sch.Schema:
         else query
     )
     with self.begin() as con:
-        cur = con.exec_driver_sql(f"select * from {query} t0 limit 0")
+        cur = con.exec_driver_sql(f"SELECT * FROM {query} t0 LIMIT 0")
         qry_cols = [
             f"('{column.name}'::text, {column.type_code},"
             + f"{column.table_oid if column.table_oid else 'NULL'}::int,"
@@ -89,7 +89,7 @@ def _metadata(self, query: str) -> sch.Schema:
             for idx, column in enumerate(cur.cursor.description)
         ]
         type_info = con.exec_driver_sql(
-            f"""select name, CASE WHEN t0.attrelid is NULL
+            f"""SELECT name, CASE WHEN t0.attrelid is NULL
                                 THEN format_type(t0.type_code, NULL)
                                 ELSE format_type(t1.atttypid, t1.atttypmod) END AS type
                     FROM UNNEST(array[{','.join(qry_cols)}])
