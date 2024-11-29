@@ -91,10 +91,10 @@ def _metadata(self, query: str) -> sch.Schema:
         type_info = con.exec_driver_sql(
             f"""select name, CASE WHEN t0.attrelid is NULL
                                 THEN format_type(t0.type_code, NULL)
-                                ELSE format_type(t1.atttypid, t1.atttypmod) END as type
-                    from unnest(array[{','.join(qry_cols)}])
-                    as t0(name text, type_code int, attrelid int, attnum int, col_ord int)
-                    left join pg_attribute t1 using (attrelid, attnum) order by col_ord"""
+                                ELSE format_type(t1.atttypid, t1.atttypmod) END AS type
+                    FROM UNNEST(array[{','.join(qry_cols)}])
+                    AS t0(name text, type_code int, attrelid int, attnum int, col_ord int)
+                    LEFT JOIN pg_attribute t1 USING (attrelid, attnum) ORDER BY col_ord"""
         )
     yield from ((col, _get_type(typestr)) for col, typestr in type_info)
 
