@@ -11,7 +11,10 @@ The sample shell script `./reconcile.sh` shows how the files can be executed usi
 
 ```
 ./reconcile.sh oracle postgres
+```
 
+Example output:
+```
 Processing file: cons_fk.sql
 ╒═══════════════════╤═══════════════════╤═════════════════════╤══════════════════════╤════════════════════╤════════════════════╤══════════════════╤═════════════════════╤══════════╕
 │ validation_name   │ validation_type   │ source_table_name   │ source_column_name   │ source_agg_value   │ target_agg_value   │ pct_difference   │ validation_status   │ run_id   │
