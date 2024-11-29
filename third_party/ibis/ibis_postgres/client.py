@@ -17,9 +17,9 @@ from typing import Literal
 import ibis.expr.datatypes as dt
 import ibis.expr.schema as sch
 import sqlalchemy as sa
-from ibis import util
 from ibis.backends.postgres import Backend as PostgresBackend
 from ibis.backends.postgres.datatypes import _BRACKETS, _parse_numeric, _type_mapping
+import re
 
 
 def do_connect(
@@ -72,8 +72,16 @@ def do_connect(
 
 
 def _metadata(self, query: str) -> sch.Schema:
+    # This function is called when ibis has to figure out the datatypes of columns in a custom query validation OR
+    # when ibis encounters a column with a datatype not supported in https://ibis-project.org/reference/datatypes
+    # In the latter case, this just returns None for that column, resulting in a NotImplementedError elsewhere.
+    query = (
+        f"({query})"
+        if re.search(r"^\s*SELECT\s", query, flags=re.MULTILINE | re.IGNORECASE)
+        else query
+    )
     with self.begin() as con:
-        cur = con.exec_driver_sql(f"select * from ({query}) t0 limit 0")
+        cur = con.exec_driver_sql(f"select * from {query} t0 limit 0")
         qry_cols = [
             f"('{column.name}'::text, {column.type_code},"
             + f"{column.table_oid if column.table_oid else 'NULL'}::int,"
@@ -110,9 +118,12 @@ def _get_type(typestr: str) -> dt.DataType:
     # passed to the _parse_numeric() function.
     # An alternative was to remove "numeric" from _type_mapping but that would be yet more monkey
     # patching, at least this function is already patched.
-    if typ is not None and typestr_wo_length != "numeric":
+    if typ and typestr_wo_length == "numeric":
+        return _parse_numeric(typestr)
+    elif typ:
         return dt.Array(typ) if is_array else typ
-    return _parse_numeric(typestr)
+    else:
+        return None  # Type is not known - will result in a NotImplemented Error
 
 
 def list_schemas(self, like=None):
