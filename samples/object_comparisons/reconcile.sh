@@ -13,11 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Assumptions:
-# - Requirement to auto partition a row --hash validation.
-# - The parallel validation will run on the current host (where this script is executing).
-# - All local CPU resources are for this process to use in full.
-# - All available RAM on the host is for this process to use in full.
 
 function show_usage {
   echo 'Usage: $0 <source-sql-directory> <target-sql-directory> [optional-file-name]'
