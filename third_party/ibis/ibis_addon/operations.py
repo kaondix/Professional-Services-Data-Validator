@@ -620,7 +620,7 @@ def execute_epoch_seconds_new(op, data, **kwargs):
 
 
 def _list_tables(self, like=None, database=None) -> list:
-    """Override of BaseAlchemyBackend.list_tables that does not include views in the result."""
+    """Override of BaseAlchemyBackend.list_tables that does not include views in the result. See original method at https://github.com/ibis-project/ibis/blob/5.1.0/ibis/backends/base/sql/alchemy/__init__.py#L101"""
     tables = self.inspector.get_table_names(schema=database)
     return self._filter_with_like(tables, like)
 
