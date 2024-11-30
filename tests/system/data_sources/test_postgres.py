@@ -692,7 +692,7 @@ def test_column_validation_view_core_types_vw():
         [
             _
             for _ in DVT_CORE_TYPES_COLUMNS
-            if _ not in ("id", "col_float32", "col_char_2")
+            if _ not in ("id",  "col_char_2")
         ]
     )
     column_validation_test(
