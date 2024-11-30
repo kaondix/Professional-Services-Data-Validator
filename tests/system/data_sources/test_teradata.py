@@ -20,6 +20,7 @@ import pathlib
 
 from data_validation import cli_tools, data_validation, consts, find_tables
 from tests.system.data_sources.common_functions import (
+    DVT_CORE_TYPES_COLUMNS,
     binary_key_assertions,
     find_tables_assertions,
     id_type_test_assertions,
@@ -33,7 +34,6 @@ from tests.system.data_sources.common_functions import (
     column_validation_test,
     custom_query_validation_test,
 )
-from tests.system.data_sources.consts import DVT_CORE_TYPES_COLUMNS
 from tests.system.data_sources.test_bigquery import BQ_CONN
 
 TERADATA_USER = os.getenv("TERADATA_USER", "udf")

@@ -28,6 +28,7 @@ from tests.system.data_sources.deploy_cloudsql.cloudsql_resource_manager import 
     CloudSQLResourceManager,
 )
 from tests.system.data_sources.common_functions import (
+    DVT_CORE_TYPES_COLUMNS,
     binary_key_assertions,
     find_tables_assertions,
     id_type_test_assertions,
@@ -41,7 +42,6 @@ from tests.system.data_sources.common_functions import (
     column_validation_test,
     custom_query_validation_test,
 )
-from tests.system.data_sources.consts import DVT_CORE_TYPES_COLUMNS
 from tests.system.data_sources.test_bigquery import BQ_CONN
 
 # Local testing requires the Cloud SQL Proxy.
@@ -689,11 +689,7 @@ def test_column_validation_view_core_types_vw():
     """PostgreSQL to PostgreSQL view dvt_core_types_vw column validation"""
     # TODO Change --sum and --max options to include col_char_2 when issue-842 is complete.
     cols = ",".join(
-        [
-            _
-            for _ in DVT_CORE_TYPES_COLUMNS
-            if _ not in ("id",  "col_char_2")
-        ]
+        [_ for _ in DVT_CORE_TYPES_COLUMNS if _ not in ("id", "col_char_2")]
     )
     column_validation_test(
         tc="mock-conn",

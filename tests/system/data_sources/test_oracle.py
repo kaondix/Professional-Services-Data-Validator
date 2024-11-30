@@ -32,10 +32,10 @@ from tests.system.data_sources.common_functions import (
     schema_validation_test,
     custom_query_validation_test,
 )
-from tests.system.data_sources.consts import DVT_CORE_TYPES_COLUMNS
 from tests.system.data_sources.test_bigquery import BQ_CONN
 from tests.system.data_sources.test_postgres import CONN as PG_CONN
 from tests.system.data_sources.common_functions import (
+    DVT_CORE_TYPES_COLUMNS,
     partition_table_test,
     partition_query_test,
 )
