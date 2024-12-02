@@ -366,4 +366,4 @@ def test_custom_query_row_validation_many_columns():
 )
 def test_raw_query_dvt_row_types(capsys):
     """Test data-validation query command."""
-    raw_query_test(capsys)
+    raw_query_test(capsys, table="dvt_core_types")
