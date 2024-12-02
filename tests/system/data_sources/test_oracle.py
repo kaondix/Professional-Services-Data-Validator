@@ -794,4 +794,5 @@ def test_raw_query_long_string(capsys):
         capsys,
         query="""SELECT RPAD('some-long-string',256,'x') c FROM dual UNION ALL
                  SELECT RPAD('some-long-string',512,'y') c FROM dual""",
+        expected_rows=2,
     )
