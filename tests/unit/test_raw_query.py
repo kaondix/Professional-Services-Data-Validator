@@ -13,9 +13,6 @@
 # limitations under the License.
 
 import pytest
-from unittest.mock import Mock
-
-from sqlalchemy.engine.row import Row
 
 
 @pytest.fixture

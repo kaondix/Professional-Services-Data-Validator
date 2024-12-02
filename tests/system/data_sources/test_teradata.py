@@ -715,4 +715,4 @@ def test_row_validation_comp_fields_bool_to_bigquery():
 )
 def test_raw_query_dvt_row_types(capsys):
     """Test data-validation query command."""
-    raw_query_test(capsys)
+    raw_query_test(capsys, table="udf.dvt_core_types")
