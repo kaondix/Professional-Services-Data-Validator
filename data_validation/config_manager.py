@@ -875,12 +875,12 @@ class ConfigManager(object):
                 _ in ["string", "!string", "json", "!json"]
                 for _ in [column_type, target_column_type]
             ):
-                # These string types are aggregated using lengths.
+                # These string types are aggregated using their lengths.
                 return True
             elif column_type in ["binary", "!binary"]:
                 if agg_type == "count":
                     # Oracle BLOB is invalid for use with SQL COUNT function.
-                    # The expresion below returns True of either source or client is Oracle
+                    # The expression below returns True of either source or client is Oracle
                     # which has the effect of trigering use of byte_length transformation.
                     return bool(
                         self.source_client.name == "oracle"
