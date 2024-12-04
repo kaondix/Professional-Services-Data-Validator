@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 import pathlib
 
 from data_validation import __main__ as main
-from data_validation import consts, data_validation
+from data_validation import consts, data_validation, raw_query
 
 from data_validation import (
     cli_tools,
@@ -163,11 +163,13 @@ def find_tables_assertions(command_output: str):
 
 
 def schema_validation_test(
-    tables="pso_data_validator.dvt_core_types",
-    tc="bq-conn",
-    exclusion_columns="id",
-    allow_list=None,
-    allow_list_file=None,
+    tables: str = "pso_data_validator.dvt_core_types",
+    tc: str = "bq-conn",
+    filter_status: str = "fail",
+    exclusion_columns: str = "id",
+    allow_list: str = None,
+    allow_list_file: str = None,
+    bq_result_handler: str = None,
 ):
     """Generic schema validation test.
 
@@ -181,15 +183,17 @@ def schema_validation_test(
         f"-tc={tc}",
         f"-tbls={tables}",
         f"--exclusion-columns={exclusion_columns}",
-        "--filter-status=fail",
+        f"--filter-status={filter_status}" if filter_status else None,
         f"--allow-list={allow_list}" if allow_list else None,
         f"--allow-list-file={allow_list_file}" if allow_list_file else None,
+        f"--bq-result-handler={bq_result_handler}" if bq_result_handler else None,
     ]
     cli_arg_list = [_ for _ in cli_arg_list if _]
     args = parser.parse_args(cli_arg_list)
     df = run_test_from_cli_args(args)
-    # With filter on failures the data frame should be empty
-    assert len(df) == 0
+    if filter_status == "fail":
+        # With filter on failures the data frame should be empty
+        assert len(df) == 0
 
 
 def column_validation_test_args(
@@ -451,3 +455,28 @@ def custom_query_validation_test(
     else:
         # With filter on failures the data frame should be empty
         assert len(df) == 0
+
+
+def raw_query_test(
+    capsys,
+    conn: str = "mock-conn",
+    query: str = "select * from pso_data_validator.dvt_core_types",
+    table: str = None,
+    expected_rows: int = 3,
+):
+    """Raw query test."""
+    parser = cli_tools.configure_arg_parser()
+    if table:
+        query = f"select * from {table}"
+    cli_arg_list = [
+        "query",
+        f"--conn={conn}",
+        f"--query={query}",
+    ]
+    args = parser.parse_args(cli_arg_list)
+    rows = raw_query.run_raw_query_against_connection(args)
+    assert len(rows) == expected_rows
+    assert len(rows[0]) > 0
+    raw_query.print_raw_query_output(rows)
+    captured = capsys.readouterr()
+    assert "characters truncated" not in captured.out

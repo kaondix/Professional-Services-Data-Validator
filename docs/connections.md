@@ -14,16 +14,36 @@ To do so simply add the GCS path to the environment i.e
 ## Using GCP Secret Manager
 DVT supports [Google Cloud Secret Manager](https://cloud.google.com/secret-manager) for storing and referencing secrets in your connection configuration.
 
-If the secret-manager flags are present, the remaining connection flags should reference secret names instead of the secret itself. For example,
-the following BigQuery connection references a secret with name 'dvt-project-id' stored in project MY-PROJECT.
+If the secret-manager flags are present, any of the remaining connection flags can reference secret names instead of the secret itself.
 
+Example 1: A BigQuery connection referencing a secret with name "dvt-project-secret" stored in project `my-project`:
 ```
 data-validation connections add \
     --secret-manager-type GCP \
-    --secret-manager-project-id <MY-PROJECT> \
+    --secret-manager-project-id my-project \
     --connection-name bq BigQuery \
-    --project-id 'dvt-project-id'
+    --project-id "dvt-project-secret"
+```
 
+Example 2: A PostgreSQL connection referencing a mixture of secrets (for `--host` and `--password`) stored in project `my-project` and simple string tokens:
+```
+data-validation connections add \
+    --secret-manager-type GCP \
+    --secret-manager-project-id my-project \
+    --connection-name pg Postgres \
+    --host=pg-host-secret \
+    --user=dvt_user \
+    --password=dvt-password-secret \
+    --database=mydatabase
+```
+
+Example 3: An entire Oracle URL stored as a secret with name "dvt-url-secret" stored in project `my-project`:
+```
+data-validation connections add \
+    --secret-manager-type GCP \
+    --secret-manager-project-id my-project \
+    --connection-name ora_uat Oracle \
+    --url="dvt-url-secret"
 ```
 
 ## List existing connections
@@ -80,6 +100,8 @@ data-validation connections add
     --connection-name CONN_NAME BigQuery                Connection name
     --project-id MY_PROJECT                             Project ID where BQ data resides
     [--google-service-account-key-path PATH_TO_SA_KEY]  Path to SA key
+    [--api-endpoint ENDPOINT_URI]                       BigQuery API endpoint (e.g.
+                                                        "https://mybq.p.googleapis.com)
 ```
 
 ### User/Service account needs following BigQuery permissions to run DVT:
@@ -103,6 +125,8 @@ data-validation connections add
     --instance-id MY_INSTANCE                           Spanner instance to connect to
     --database-id MY-DB                                 Spanner database (schema) to connect to
     [--google-service-account-key-path PATH_TO_SA_KEY]  Path to SA key
+    [--api-endpoint ENDPOINT_URI]                       Spanner API endpoint (e.g.
+                                                        "https://mycs.p.googleapis.com)
 ```
 
 ###  User/Service account needs following Spanner role to run DVT:
