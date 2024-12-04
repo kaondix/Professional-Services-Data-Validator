@@ -876,9 +876,7 @@ class ConfigManager(object):
     ) -> bool:
         if self._is_uuid(source_type, target_type):
             return bool("uuid" in supported_types)
-        return bool(
-            source_type not in supported_types or target_type not in supported_types
-        )
+        return bool(source_type in supported_types and target_type in supported_types)
 
     def build_config_column_aggregates(
         self, agg_type, arg_value, exclude_cols, supported_types, cast_to_bigint=False
