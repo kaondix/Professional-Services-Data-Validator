@@ -628,7 +628,7 @@ class ConfigManager(object):
         return None
 
     def _is_uuid(self, source_type: str, target_type: str) -> bool:
-        """Returns whether c olumn is UUIOD based on either source of target data type.
+        """Returns whether column is UUID based on either source of target data type.
 
         We do this because some engines don't have a UUID type, therefore UUID on one side
         means both sides are UUID. i.e. we use any() not all()."""
