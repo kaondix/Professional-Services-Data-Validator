@@ -753,7 +753,7 @@ CREATE TABLE pso_data_validator.dvt_uuid_id
 (   id        uuid NOT NULL PRIMARY KEY
 ,   col_uuid  uuid
 ,   col_data  varchar(10));
-COMMENT ON TABLE pso_data_validator.dvt_uuid_id IS 'Integration test table used to test UUID data type.';
+COMMENT ON TABLE pso_data_validator.dvt_uuid_id IS 'Integration test table used to test UUID data type as a primary key.';
 INSERT INTO pso_data_validator.dvt_uuid_id VALUES
 (uuid('387bdc3b218443b28ec23ac791c5b0f1')
 ,uuid('387bdc3b218443b28ec23ac791c5b0f1')

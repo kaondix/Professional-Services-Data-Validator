@@ -627,6 +627,13 @@ class ConfigManager(object):
             return "bool"
         return None
 
+    def _is_uuid(self, source_type: str, target_type: str) -> bool:
+        """Returns whether c olumn is UUIOD based on either source of target data type.
+
+        We do this because some engines don't have a UUID type, therefore UUID on one side
+        means both sides are UUID. i.e. we use any() not all()."""
+        return any(_ in ["uuid", "!uuid"] for _ in [source_type, target_type])
+
     def build_config_comparison_fields(self, fields, depth=None):
         """Return list of field config objects."""
         field_configs = []
@@ -761,15 +768,25 @@ class ConfigManager(object):
         if column_type in ["string", "!string"]:
             calc_func = "length"
 
+        elif self._is_uuid(column_type, target_column_type):
+            # Cast to a known DVT format for a UUID in a string.
+            pre_calculated_config = self.build_and_append_pre_agg_calc_config(
+                source_column,
+                target_column,
+                "cast",
+                column_position,
+                "string",
+                depth,
+            )
+            source_column = target_column = pre_calculated_config[
+                consts.CONFIG_FIELD_ALIAS
+            ]
+            # TODO We need to remove hyphens too.
+            depth = 1
+            calc_func = "upper"
+
         elif column_type in ["binary", "!binary"]:
             calc_func = "byte_length"
-
-        elif column_type in ["uuid", "!uuid"] or target_column_type in [
-            "uuid",
-            "!uuid",
-        ]:
-            # Cast to a known DVT format for a UUID in a string.
-            calc_func = "uuid_string"
 
         elif column_type in ["timestamp", "!timestamp", "date", "!date"]:
             if (
@@ -854,6 +871,15 @@ class ConfigManager(object):
             or isinstance(target_column_ibis_type, dt.Binary)
         )
 
+    def _type_is_supported_for_agg_validation(
+        self, source_type: str, target_type: str, supported_types: list
+    ) -> bool:
+        if self._is_uuid(source_type, target_type):
+            return bool("uuid" in supported_types)
+        return bool(
+            source_type not in supported_types or target_type not in supported_types
+        )
+
     def build_config_column_aggregates(
         self, agg_type, arg_value, exclude_cols, supported_types, cast_to_bigint=False
     ):
@@ -869,6 +895,8 @@ class ConfigManager(object):
                 "string",
                 "!string",
             ]:
+                return True
+            elif self._is_uuid(column_type, target_column_type):
                 return True
             elif column_type in ["binary", "!binary"]:
                 if agg_type == "count":
@@ -893,12 +921,6 @@ class ConfigManager(object):
                 "bit_xor",
             ):
                 # For timestamps: do not convert to epoch seconds for min/max
-                return True
-            elif (
-                column_type in ["uuid", "!uuid"]
-                or target_column_type in ["uuid", "!uuid"]
-            ) and agg_type in ("min", "max"):
-                # Cast to a known DVT format for a UUID in a string.
                 return True
             return False
 
@@ -956,9 +978,8 @@ class ConfigManager(object):
                     f"Skipping {agg_type} on {column} as column is not present in target table"
                 )
                 continue
-            elif supported_types and (
-                column_type not in supported_types
-                or target_column_type not in supported_types
+            elif supported_types and not self._type_is_supported_for_agg_validation(
+                column_type, target_column_type, supported_types
             ):
                 if self.verbose:
                     logging.info(

@@ -699,7 +699,7 @@ CREATE TABLE pso_data_validator.dvt_uuid_id
 (   id        RAW(16) NOT NULL PRIMARY KEY
 ,   col_uuid  RAW(16)
 ,   col_data  VARCHAR2(10));
-COMMENT ON TABLE pso_data_validator.dvt_uuid_id IS 'Integration test table used to test RAW data type as UUID.';
+COMMENT ON TABLE pso_data_validator.dvt_uuid_id IS 'Integration test table used to test RAW data type as UUID as a primary key.';
 INSERT INTO pso_data_validator.dvt_uuid_id VALUES
 (HEXTORAW('387BDC3B218443B28EC23AC791C5B0F1')
 ,HEXTORAW('387BDC3B218443B28EC23AC791C5B0F1')
