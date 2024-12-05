@@ -627,12 +627,19 @@ class ConfigManager(object):
             return "bool"
         return None
 
-    def _is_uuid(self, source_type: str, target_type: str) -> bool:
+    def _is_uuid(
+        self, source_type: Union[str, dt.DataType], target_type: Union[str, dt.DataType]
+    ) -> bool:
         """Returns whether column is UUID based on either source of target data type.
 
         We do this because some engines don't have a UUID type, therefore UUID on one side
         means both sides are UUID. i.e. we use any() not all()."""
-        return any(_ in ["uuid", "!uuid"] for _ in [source_type, target_type])
+        if isinstance(source_type, str):
+            return any(_ in ["uuid", "!uuid"] for _ in [source_type, target_type])
+        else:
+            return bool(
+                isinstance(source_type, dt.UUID) or isinstance(target_type, dt.UUID)
+            )
 
     def build_config_comparison_fields(self, fields, depth=None):
         """Return list of field config objects."""
@@ -852,9 +859,7 @@ class ConfigManager(object):
         target_column_ibis_type: dt.DataType,
     ) -> str:
         """Return a string cast if the datatype combination requires it, otherwise None."""
-        if isinstance(source_column_ibis_type, dt.UUID) or isinstance(
-            target_column_ibis_type, dt.UUID
-        ):
+        if self._is_uuid(source_column_ibis_type, target_column_ibis_type):
             # This needs to come before binary check because Oracle
             # stores UUIDs (GUID) in binary columns.
             return consts.CONFIG_CAST_UUID_STRING
@@ -1104,8 +1109,8 @@ class ConfigManager(object):
         ):
             custom_params = {"calc_params": consts.CONFIG_CAST_BOOL_STRING}
             col_config.update(custom_params)
-        elif isinstance(source_table_schema[source_column], dt.UUID) or isinstance(
-            target_table_schema[target_column], dt.UUID
+        elif self._is_uuid(
+            source_table_schema[source_column], target_table_schema[target_column]
         ):
             custom_params = {"calc_params": consts.CONFIG_CAST_UUID_STRING}
             col_config.update(custom_params)
