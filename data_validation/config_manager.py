@@ -681,12 +681,8 @@ class ConfigManager(object):
             target_ibis_type = target_table[
                 casefold_target_columns[column.casefold()]
             ].type()
-            cast_type = (
-                "string"
-                if self._key_column_needs_casting_to_string(
-                    source_ibis_type, target_ibis_type
-                )
-                else None
+            cast_type = self._key_column_needs_casting_to_string(
+                source_ibis_type, target_ibis_type
             )
 
             column_config = {
@@ -854,16 +850,24 @@ class ConfigManager(object):
         self,
         source_column_ibis_type: dt.DataType,
         target_column_ibis_type: dt.DataType,
-    ) -> bool:
-        return bool(
+    ) -> str:
+        """Return a string cast if the datatype combination requires it, otherwise None."""
+        if isinstance(source_column_ibis_type, dt.UUID) or isinstance(
+            target_column_ibis_type, dt.UUID
+        ):
+            # This needs to come before binary check because Oracle
+            # stores UUIDs (GUID) in binary columns.
+            return consts.CONFIG_CAST_UUID_STRING
+        elif (
             self._decimal_column_too_big_for_pandas(
                 source_column_ibis_type, target_column_ibis_type
             )
             or isinstance(source_column_ibis_type, dt.Binary)
             or isinstance(target_column_ibis_type, dt.Binary)
-            or isinstance(source_column_ibis_type, dt.UUID)
-            or isinstance(target_column_ibis_type, dt.UUID)
-        )
+        ):
+            return "string"
+        else:
+            return None
 
     def _type_is_supported_for_agg_validation(
         self, source_type: str, target_type: str, supported_types: list
@@ -1099,6 +1103,11 @@ class ConfigManager(object):
             target_table_schema[target_column], dt.Boolean
         ):
             custom_params = {"calc_params": consts.CONFIG_CAST_BOOL_STRING}
+            col_config.update(custom_params)
+        elif isinstance(source_table_schema[source_column], dt.UUID) or isinstance(
+            target_table_schema[target_column], dt.UUID
+        ):
+            custom_params = {"calc_params": consts.CONFIG_CAST_UUID_STRING}
             col_config.update(custom_params)
 
         return col_config

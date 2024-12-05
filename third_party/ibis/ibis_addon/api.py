@@ -52,6 +52,10 @@ def cast(self, target_type: dt.DataType) -> Value:
         # Comparing string value with boolean.
         op = ops.SimpleCase(self, ("0", "1", "N", "Y"), (0, 1, 0, 1), None)
         return op.to_expr()
+    elif target_type == consts.CONFIG_CAST_UUID_STRING:
+        # When casting UUIDs to string we strip out hyphens to enable
+        # us to match UUIDs stored in binary columns.
+        return ops.Cast(self, to="string").to_expr().replace("-", "")
 
     op = ops.Cast(self, to=target_type)
     if same_type(op.to, self.type()) and not op.to.is_timestamp():

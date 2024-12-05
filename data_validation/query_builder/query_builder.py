@@ -220,6 +220,8 @@ class ComparisonField(object):
         comparison_field = ibis_table[self.field_name]
         alias = self.alias or self.field_name
         if self.cast:
+            # TODO Not sure what to do here yet.
+            # if self.cast != consts.CONFIG_CAST_UUID_STRING:
             comparison_field = comparison_field.force_cast(self.cast)
         elif self.trim and comparison_field.type().is_string():
             comparison_field = comparison_field.rstrip()
