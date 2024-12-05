@@ -632,7 +632,10 @@ class ConfigManager(object):
     def _is_bool(
         self, source_type: Union[str, dt.DataType], target_type: Union[str, dt.DataType]
     ) -> bool:
-        """Returns whether column is BOOLEAN based on either source of target data type"""
+        """Returns whether column is BOOLEAN based on either source or target data type.
+
+        We do this because some engines don't have a BOOLEAN type, therefore BOOLEAN on one side
+        means both sides need to be BOOLEAN aware."""
         if isinstance(source_type, str):
             return any(_ in ["bool", "!bool"] for _ in [source_type, target_type])
         else:
@@ -644,7 +647,7 @@ class ConfigManager(object):
     def _is_uuid(
         self, source_type: Union[str, dt.DataType], target_type: Union[str, dt.DataType]
     ) -> bool:
-        """Returns whether column is UUID based on either source of target data type.
+        """Returns whether column is UUID based on either source or target data type.
 
         We do this because some engines don't have a UUID type, therefore UUID on one side
         means both sides are UUID. i.e. we use any() not all()."""
