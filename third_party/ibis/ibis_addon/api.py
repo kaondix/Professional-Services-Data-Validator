@@ -21,6 +21,11 @@ from ibis.expr.types.generic import Value
 from data_validation import consts
 
 
+def _uuid_string_cast(self):
+    """When casting UUIDs to string we strip out hyphens to enable us to match UUIDs stored in binary columns."""
+    return ops.Cast(self, to="string").to_expr().replace("-", "").lower()
+
+
 def cast(self, target_type: dt.DataType) -> Value:
     """Override ibis.expr.api's cast method.
     This allows for Timestamp-typed columns to be cast to Timestamp, since Ibis interprets some similar but non-equivalent types (eg. DateTime) to Timestamp (GitHub issue #451).
@@ -53,9 +58,7 @@ def cast(self, target_type: dt.DataType) -> Value:
         op = ops.SimpleCase(self, ("0", "1", "N", "Y"), (0, 1, 0, 1), None)
         return op.to_expr()
     elif target_type == consts.CONFIG_CAST_UUID_STRING:
-        # When casting UUIDs to string we strip out hyphens to enable
-        # us to match UUIDs stored in binary columns.
-        return ops.Cast(self, to="string").to_expr().replace("-", "").lower()
+        return _uuid_string_cast(self)
 
     op = ops.Cast(self, to=target_type)
     if same_type(op.to, self.type()) and not op.to.is_timestamp():
@@ -71,10 +74,13 @@ def cast(self, target_type: dt.DataType) -> Value:
     return op.to_expr()
 
 
-def force_cast(self, target_type: dt.DataType) -> Value:
+def force_cast(self, target_type: str) -> Value:
     """New method to force cast even if data type is the same.
     Used to cast a value to itself in ComparisonFields for nuances in data types i.e. casting CHAR to VARCHAR which are both Ibis strings
     """
+    if target_type == consts.CONFIG_CAST_UUID_STRING:
+        return _uuid_string_cast(self)
+
     # validate target type
     try:
         op = ops.Cast(self, to=target_type)

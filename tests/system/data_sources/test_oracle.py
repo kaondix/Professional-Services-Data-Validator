@@ -819,6 +819,9 @@ def test_row_validation_uuid_comp_oracle_to_postgres():
     new=mock_get_connection_config,
 )
 def test_row_validation_uuid_rr_oracle_to_postgres():
+    pytest.skip(
+        "Skipping test_row_validation_uuid_rr_oracle_to_postgres until we support random-rows on UUIDs: issue-1366."
+    )
     row_validation_test(
         tables="pso_data_validator.dvt_uuid_id",
         tc="pg-conn",
