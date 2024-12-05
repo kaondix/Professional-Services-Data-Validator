@@ -606,10 +606,10 @@ INSERT INTO `pso_data_validator`.`dvt_bool` VALUES (2,false,false,false,false);
 -- BigQuery stores UUIDs in STRINGs, see GENERATE_UUID().
 DROP TABLE `pso_data_validator`.`dvt_uuid_id`;
 CREATE TABLE `pso_data_validator`.`dvt_uuid_id`
-(   id        STRING NOT NULL PRIMARY KEY
+(   id        STRING NOT NULL
 ,   col_uuid  STRING
 ,   col_data  STRING
-) OPTIONS (description='Integration test table used to test UUID data type as a primary key.';
+) OPTIONS (description='Integration test table used to test UUID data type as a primary key.');
 INSERT INTO `pso_data_validator`.`dvt_uuid_id` VALUES
 ('387bdc3b-2184-43b2-8ec2-3ac791c5b0f1','387bdc3b-2184-43b2-8ec2-3ac791c5b0f1','A'),
 ('397bdc3b-2184-43b2-8ec2-3ac791c5b0f1','397bdc3b-2184-43b2-8ec2-3ac791c5b0f1','B');

@@ -100,6 +100,7 @@ ORA2PG_COLUMNS = [
     "col_blob",
     "col_clob",
     "col_nclob",
+    "col_uuid",
 ]
 
 
