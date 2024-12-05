@@ -587,11 +587,11 @@ class ConfigManager(object):
             if (
                 source_ibis_type.is_string() or target_ibis_type.is_string()
             ) and self._comp_field_cast(
-                # Do not add rstrip if the column is a bool hiding in a string.
+                # Do not add rstrip if the column is a bool or UUID hiding in a string.
                 source_table_schema,
                 target_table_schema,
                 field,
-            ) != "bool":
+            ):
                 logging.info(
                     f"Adding rtrim() to string comparison field `{field.casefold()}` due to Teradata CHAR padding."
                 )
@@ -617,15 +617,29 @@ class ConfigManager(object):
     ) -> str:
         # We check with .get() below because sometimes field is a computed name
         # like "concat__all" which is not in the real table.
-        if (
-            source_table_schema.get(field, None)
-            and isinstance(source_table_schema[field], dt.Boolean)
-        ) or (
-            target_table_schema.get(field, None)
-            and isinstance(target_table_schema[field], dt.Boolean)
-        ):
+        source_type = (
+            source_table_schema[field] if field in source_table_schema else None
+        )
+        target_type = (
+            target_table_schema[field] if field in target_table_schema else None
+        )
+        if self._is_bool(source_type, target_type):
             return "bool"
+        elif self._is_uuid(source_type, target_type):
+            return consts.CONFIG_CAST_UUID_STRING
         return None
+
+    def _is_bool(
+        self, source_type: Union[str, dt.DataType], target_type: Union[str, dt.DataType]
+    ) -> bool:
+        """Returns whether column is BOOLEAN based on either source of target data type"""
+        if isinstance(source_type, str):
+            return any(_ in ["bool", "!bool"] for _ in [source_type, target_type])
+        else:
+            return bool(
+                isinstance(source_type, dt.Boolean)
+                or isinstance(target_type, dt.Boolean)
+            )
 
     def _is_uuid(
         self, source_type: Union[str, dt.DataType], target_type: Union[str, dt.DataType]
