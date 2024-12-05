@@ -586,7 +586,7 @@ class ConfigManager(object):
 
             if (
                 source_ibis_type.is_string() or target_ibis_type.is_string()
-            ) and self._comp_field_cast(
+            ) and not self._comp_field_cast(
                 # Do not add rstrip if the column is a bool or UUID hiding in a string.
                 source_table_schema,
                 target_table_schema,
