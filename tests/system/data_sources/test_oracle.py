@@ -778,12 +778,13 @@ def test_row_validation_comp_fields_bool_to_postgres():
     new=mock_get_connection_config,
 )
 def test_column_validation_uuid_oracle_to_postgres():
+    """Test column validation with UUID columns to PostgreSQL"""
     column_validation_test(
         tc="pg-conn",
         tables="pso_data_validator.dvt_uuid_id",
         count_cols="*",
-        # sum_cols="*",
-        # min_cols="*",
+        sum_cols="*",
+        min_cols="*",
     )
 
 
@@ -792,6 +793,7 @@ def test_column_validation_uuid_oracle_to_postgres():
     new=mock_get_connection_config,
 )
 def test_row_validation_uuid_hash_oracle_to_postgres():
+    """Test row validation with UUID column and primary key to PostgreSQL"""
     row_validation_test(
         tables="pso_data_validator.dvt_uuid_id",
         tc="pg-conn",
