@@ -726,8 +726,8 @@ class ConfigManager(object):
         target_column,
         calc_func,
         column_position,
-        cast_type=None,
-        depth=0,
+        cast_type: str = None,
+        depth: int = 0,
     ):
         """Create calculated field config used as a pre-aggregation step. Appends to calculated fields if does not already exist and returns created config."""
         calculated_config = {
@@ -740,7 +740,7 @@ class ConfigManager(object):
             consts.CONFIG_DEPTH: depth,
         }
 
-        if calc_func == "cast" and cast_type is not None:
+        if calc_func == consts.CONFIG_CAST and cast_type is not None:
             calculated_config[consts.CONFIG_DEFAULT_CAST] = cast_type
             calculated_config[consts.CONFIG_FIELD_ALIAS] = self._prefix_calc_col_name(
                 source_column, f"{calc_func}_{cast_type}", column_position
@@ -769,21 +769,8 @@ class ConfigManager(object):
             calc_func = "length"
 
         elif self._is_uuid(column_type, target_column_type):
-            # Cast to a known DVT format for a UUID in a string.
-            pre_calculated_config = self.build_and_append_pre_agg_calc_config(
-                source_column,
-                target_column,
-                "cast",
-                column_position,
-                "string",
-                depth,
-            )
-            source_column = target_column = pre_calculated_config[
-                consts.CONFIG_FIELD_ALIAS
-            ]
-            # TODO We need to remove hyphens too.
-            depth = 1
-            calc_func = "upper"
+            calc_func = "cast"
+            cast_type = "string"
 
         elif column_type in ["binary", "!binary"]:
             calc_func = "byte_length"
@@ -800,8 +787,8 @@ class ConfigManager(object):
                     target_column,
                     calc_func,
                     column_position,
-                    cast_type,
-                    depth,
+                    cast_type=cast_type,
+                    depth=depth,
                 )
                 source_column = target_column = pre_calculated_config[
                     consts.CONFIG_FIELD_ALIAS
@@ -818,7 +805,12 @@ class ConfigManager(object):
             raise ValueError(f"Unsupported column type: {column_type}")
 
         calculated_config = self.build_and_append_pre_agg_calc_config(
-            source_column, target_column, calc_func, column_position, cast_type, depth
+            source_column,
+            target_column,
+            calc_func,
+            column_position,
+            cast_type=cast_type,
+            depth=depth,
         )
 
         aggregate_config = {
@@ -869,6 +861,8 @@ class ConfigManager(object):
             )
             or isinstance(source_column_ibis_type, dt.Binary)
             or isinstance(target_column_ibis_type, dt.Binary)
+            or isinstance(source_column_ibis_type, dt.UUID)
+            or isinstance(target_column_ibis_type, dt.UUID)
         )
 
     def _type_is_supported_for_agg_validation(
