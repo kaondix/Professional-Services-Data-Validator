@@ -765,8 +765,8 @@ class ConfigManager(object):
             calc_func = "length"
 
         elif self._is_uuid(column_type, target_column_type):
-            calc_func = "cast"
-            cast_type = "string"
+            calc_func = consts.CONFIG_CAST
+            cast_type = consts.CONFIG_CAST_UUID_STRING
 
         elif column_type in ["binary", "!binary"]:
             calc_func = "byte_length"
@@ -776,7 +776,7 @@ class ConfigManager(object):
                 self.source_client.name == "bigquery"
                 or self.target_client.name == "bigquery"
             ):
-                calc_func = "cast"
+                calc_func = consts.CONFIG_CAST
                 cast_type = "timestamp"
                 pre_calculated_config = self.build_and_append_pre_agg_calc_config(
                     source_column,
@@ -794,7 +794,7 @@ class ConfigManager(object):
             calc_func = "epoch_seconds"
 
         elif column_type == "int32" or column_type == "!int32":
-            calc_func = "cast"
+            calc_func = consts.CONFIG_CAST
             cast_type = "int64"
 
         else:
