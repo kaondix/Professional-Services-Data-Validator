@@ -94,18 +94,22 @@ class Backend(BaseSQLBackend):
         SELECT * FROM DBC.Tables
         WHERE DatabaseName LIKE '%{database_like}%'
         AND TableName LIKE '%{table_like}%'
-        AND TableKind = 'T'
+        AND TableKind LIKE '{kind_like}'
     """
 
-    def list_tables(self, like=None, database=None):
+    def list_tables(self, like=None, database=None, kind_like: str = "%") -> list:
         database = database or ""
         table = like or ""
 
         list_table_sql = self.LIST_TABLE_SQL.format(
-            database_like=database, table_like=table
+            database_like=database, table_like=table, kind_like=kind_like
         )
         tables_df = self._execute(list_table_sql, results=True)
         return list(tables_df.TableName.str.rstrip())
+
+    def dvt_list_tables(self, like=None, database=None) -> list:
+        """Duplicate of list_tables() but only returning tables in the output."""
+        return self.list_tables(like=like, database=database, kind_like="T")
 
     def _fully_qualified_name(self, name, database):
         if database:
@@ -131,9 +135,9 @@ class Backend(BaseSQLBackend):
         schema_list = schema_df.to_dict("records")
         schema = {}
         for col_data in schema_list:
-            schema[
-                col_data["Column SQL Name"].rstrip()
-            ] = TeradataTypeTranslator.to_ibis(col_data)
+            schema[col_data["Column SQL Name"].rstrip()] = (
+                TeradataTypeTranslator.to_ibis(col_data)
+            )
 
         return schema
 

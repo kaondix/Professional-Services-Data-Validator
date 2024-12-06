@@ -619,8 +619,8 @@ def execute_epoch_seconds_new(op, data, **kwargs):
         return epoch_series
 
 
-def _list_tables(self, like=None, database=None) -> list:
-    """Override of BaseAlchemyBackend.list_tables that does not include views in the result. See original method at https://github.com/ibis-project/ibis/blob/5.1.0/ibis/backends/base/sql/alchemy/__init__.py#L101"""
+def _dvt_list_tables(self, like=None, database=None) -> list:
+    """Alternative to BaseAlchemyBackend.list_tables that does not include views in the result."""
     tables = self.inspector.get_table_names(schema=database)
     return self._filter_with_like(tables, like)
 
@@ -632,7 +632,9 @@ BinaryValue.byte_length = compile_binary_length
 NumericValue.to_char = compile_to_char
 TemporalValue.to_char = compile_to_char
 
-BaseAlchemyBackend.list_tables = _list_tables
+# This is an additional DVT only method. We tag this onto BaseAlchemyBackend
+# so we can piggy back Ibis code rather than writing metadata queries for all engines.
+BaseAlchemyBackend.dvt_list_tables = _dvt_list_tables
 
 BigQueryExprTranslator._registry[HashBytes] = format_hashbytes_bigquery
 BigQueryExprTranslator._registry[RawSQL] = format_raw_sql
