@@ -756,7 +756,7 @@ class ConfigManager(object):
         target_column_type: str,
         column_position: int,
     ) -> dict:
-        """Append calculated field for length(string | binary) or epoch_seconds(timestamp) for preprocessing before column validation aggregation."""
+        """Append calculated field for length() or epoch_seconds(timestamp) for preprocessing before column validation aggregation."""
         depth, cast_type = 0, None
         if any(_ in ["json", "!json"] for _ in [column_type, target_column_type]):
             # JSON data which needs casting to string before we apply a length function.
