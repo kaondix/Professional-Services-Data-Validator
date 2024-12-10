@@ -875,7 +875,7 @@ class ConfigManager(object):
                 _ in ["string", "!string", "json", "!json"]
                 for _ in [column_type, target_column_type]
             ):
-                # These string types are aggregated using their lengths.
+                # These data types are aggregated using their lengths.
                 return True
             elif column_type in ["binary", "!binary"]:
                 if agg_type == "count":
