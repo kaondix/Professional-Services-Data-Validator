@@ -880,7 +880,7 @@ class ConfigManager(object):
             elif column_type in ["binary", "!binary"]:
                 if agg_type == "count":
                     # Oracle BLOB is invalid for use with SQL COUNT function.
-                    # The expression below returns True if either client is Oracle which
+                    # The expression below returns True if client is Oracle which
                     # has the effect of triggering use of byte_length transformation.
                     return bool(
                         self.source_client.name == "oracle"
