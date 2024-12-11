@@ -18,12 +18,12 @@ from unittest import mock
 import pytest
 import pathlib
 
-from data_validation import cli_tools, data_validation, consts, find_tables
+from data_validation import cli_tools, data_validation, consts
 from tests.system.data_sources.common_functions import (
     binary_key_assertions,
     column_validation_test,
     column_validation_test_config_managers,
-    find_tables_assertions,
+    find_tables_test,
     id_type_test_assertions,
     null_not_null_assertions,
     raw_query_test,
@@ -667,17 +667,16 @@ def test_custom_query_row_validation_oracle_to_postgres():
 )
 def test_find_tables():
     """Oracle to BigQuery test of find-tables command."""
-    parser = cli_tools.configure_arg_parser()
-    args = parser.parse_args(
-        [
-            "find-tables",
-            "-sc=mock-conn",
-            "-tc=bq-conn",
-            "--allowed-schemas=pso_data_validator",
-        ]
-    )
-    output = find_tables.find_tables_using_string_matching(args)
-    find_tables_assertions(output)
+    find_tables_test()
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_find_views_and_tables():
+    """Oracle to BigQuery test of find-tables command."""
+    find_tables_test(include_views=True)
 
 
 @mock.patch(

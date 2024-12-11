@@ -18,13 +18,13 @@ from unittest import mock
 import pytest
 import pathlib
 
-from data_validation import cli_tools, data_validation, consts, find_tables
+from data_validation import cli_tools, data_validation, consts
 from tests.system.data_sources.common_functions import (
     DVT_CORE_TYPES_COLUMNS,
     binary_key_assertions,
     column_validation_test,
     custom_query_validation_test,
-    find_tables_assertions,
+    find_tables_test,
     id_type_test_assertions,
     null_not_null_assertions,
     partition_table_test,
@@ -654,19 +654,7 @@ def test_custom_query_row_hash_validation_core_types_to_bigquery():
 )
 def test_find_tables():
     """Teradata to Teradata test of find-tables command."""
-    parser = cli_tools.configure_arg_parser()
-    args = parser.parse_args(
-        [
-            "find-tables",
-            "-sc=mock-conn",
-            "-tc=mock-conn",
-            "--allowed-schemas=udf",
-        ]
-    )
-    output = find_tables.find_tables_using_string_matching(args)
-    find_tables_assertions(
-        output, expected_source_schema="udf", expected_target_schema="udf"
-    )
+    find_tables_test(tc="mock-conn", allowed_schema="udf")
 
 
 @mock.patch(

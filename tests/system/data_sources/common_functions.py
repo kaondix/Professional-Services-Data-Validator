@@ -18,11 +18,14 @@ from typing import TYPE_CHECKING
 import pathlib
 
 from data_validation import __main__ as main
-from data_validation import consts, data_validation, raw_query
-
 from data_validation import (
     cli_tools,
+    consts,
+    data_validation,
+    find_tables,
+    raw_query,
 )
+
 from data_validation.partition_builder import PartitionBuilder
 
 if TYPE_CHECKING:
@@ -171,6 +174,7 @@ def find_tables_assertions(
     command_output: str,
     expected_source_schema: str = "pso_data_validator",
     expected_target_schema: str = "pso_data_validator",
+    include_views: bool = False,
     check_for_view: bool = True,
 ):
     assert isinstance(command_output, str)
@@ -186,9 +190,40 @@ def find_tables_assertions(
     assert "dvt_core_types" in [_["table_name"] for _ in output_dict]
     assert "dvt_core_types" in [_["target_table_name"] for _ in output_dict]
     if check_for_view:
-        # Assert that known view is not in the map.
-        assert "dvt_core_types_vw" not in [_["table_name"] for _ in output_dict]
-        assert "dvt_core_types_vw" not in [_["target_table_name"] for _ in output_dict]
+        # Assert that known view is or is not in the map.
+        assert (
+            "dvt_core_types_vw" in [_["table_name"] for _ in output_dict]
+        ) == include_views
+        assert (
+            "dvt_core_types_vw" in [_["target_table_name"] for _ in output_dict]
+        ) == include_views
+
+
+def find_tables_test(
+    tc: str = "bq-conn",
+    allowed_schema: str = "pso_data_validator",
+    include_views: bool = False,
+    check_for_view: bool = True,
+):
+    """Generic find-tables test"""
+    parser = cli_tools.configure_arg_parser()
+    cli_arg_list = [
+        "find-tables",
+        "-sc=mock-conn",
+        f"-tc={tc}",
+        f"--allowed-schemas={allowed_schema}",
+        "--include-views" if include_views else None,
+    ]
+    cli_arg_list = [_ for _ in cli_arg_list if _]
+    args = parser.parse_args(cli_arg_list)
+    output = find_tables.find_tables_using_string_matching(args)
+    find_tables_assertions(
+        output,
+        include_views=include_views,
+        check_for_view=check_for_view,
+        expected_source_schema=allowed_schema,
+        expected_target_schema=allowed_schema,
+    )
 
 
 def schema_validation_test(

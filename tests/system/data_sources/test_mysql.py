@@ -21,6 +21,7 @@ from data_validation import __main__ as main
 from data_validation import cli_tools, data_validation, consts, exceptions
 from tests.system.data_sources.common_functions import (
     binary_key_assertions,
+    find_tables_test,
     id_type_test_assertions,
     null_not_null_assertions,
     raw_query_test,
@@ -449,3 +450,12 @@ def test_custom_query_row_validation_many_columns():
 def test_raw_query_dvt_row_types(capsys):
     """Test data-validation query command."""
     raw_query_test(capsys)
+
+
+@mock.patch(
+    "data_validation.state_manager.StateManager.get_connection_config",
+    new=mock_get_connection_config,
+)
+def test_find_tables():
+    """MySQL to MySQL test of find-tables command."""
+    find_tables_test(tc="mock-conn")
