@@ -241,7 +241,7 @@ def list_tables(client, schema_name, tables_only=True):
     return fn(database=schema_name)
 
 
-def get_all_tables(client, allowed_schemas=None):
+def get_all_tables(client, allowed_schemas=None, tables_only=True):
     """Return a list of tuples with database and table names.
 
     client (IbisClient): Client to use for tables
@@ -253,7 +253,7 @@ def get_all_tables(client, allowed_schemas=None):
         if allowed_schemas and schema_name not in allowed_schemas:
             continue
         try:
-            tables = list_tables(client, schema_name)
+            tables = list_tables(client, schema_name, tables_only=tables_only)
         except Exception as e:
             logging.warning(f"List Tables Error: {schema_name} -> {e}")
             continue

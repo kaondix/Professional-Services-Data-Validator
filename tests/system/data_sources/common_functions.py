@@ -190,13 +190,24 @@ def find_tables_assertions(
     assert "dvt_core_types" in [_["table_name"] for _ in output_dict]
     assert "dvt_core_types" in [_["target_table_name"] for _ in output_dict]
     if check_for_view:
-        # Assert that known view is or is not in the map.
-        assert (
-            "dvt_core_types_vw" in [_["table_name"] for _ in output_dict]
-        ) == include_views
-        assert (
-            "dvt_core_types_vw" in [_["target_table_name"] for _ in output_dict]
-        ) == include_views
+        source_names = [_["table_name"] for _ in output_dict]
+        target_names = [_["target_table_name"] for _ in output_dict]
+        if include_views:
+            # Assert that known view is IN the map.
+            assert (
+                "dvt_core_types_vw" in source_names
+            ), f"dvt_core_types_vw should be in command source output: {source_names}"
+            assert (
+                "dvt_core_types_vw" in target_names
+            ), f"dvt_core_types_vw should be in command target output: {target_names}"
+        else:
+            # Assert that known view is NOT IN the map.
+            assert (
+                "dvt_core_types_vw" not in source_names
+            ), f"dvt_core_types_vw should NOT be in command source output: {source_names}"
+            assert (
+                "dvt_core_types_vw" not in target_names
+            ), f"dvt_core_types_vw should NOT be in command target output: {target_names}"
 
 
 def find_tables_test(
