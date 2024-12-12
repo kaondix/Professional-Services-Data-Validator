@@ -106,7 +106,13 @@ CREATE TABLE pso_data_validator.dvt_ora2pg_types
 ,   col_clob        CLOB
 ,   col_nclob       NCLOB
 ,   col_uuid        RAW(16)
+,   col_json        CLOB
+,   col_jsonb       CLOB
 );
+ALTER TABLE pso_data_validator.dvt_ora2pg_types
+ADD CONSTRAINT dvt_ora2pg_types_chk1 CHECK (col_json IS JSON) ENABLE;
+ALTER TABLE pso_data_validator.dvt_ora2pg_types
+ADD CONSTRAINT dvt_ora2pg_types_chk2 CHECK (col_jsonb IS JSON) ENABLE;
 COMMENT ON TABLE pso_data_validator.dvt_ora2pg_types IS 'Oracle to PostgreSQL integration test table';
 
 -- Literals below match corresponding table in postgresql_test_tables.sql
@@ -123,6 +129,7 @@ INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 ,UTL_RAW.CAST_TO_RAW('DVT'),UTL_RAW.CAST_TO_RAW('DVT')
 ,UTL_RAW.CAST_TO_RAW('DVT'),'DVT A','DVT A'
 ,HEXTORAW('187BDC3B218443B28EC23AC791C5B0F1')
+,'{"dvt": 123, "status": "abc"}','{"dvt": 123, "status": "abc"}'
 );
 INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 (2,2222,123456789,123456789012345678,1234567890123456789012345
@@ -137,6 +144,7 @@ INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 ,UTL_RAW.CAST_TO_RAW('DVT'),UTL_RAW.CAST_TO_RAW('DVT DVT')
 ,UTL_RAW.CAST_TO_RAW('DVT DVT'),'DVT B','DVT B'
 ,HEXTORAW('287BDC3B218443B28EC23AC791C5B0F1')
+,'{"dvt": 234, "status": "def"}','{"dvt": 234, "status": "def"}'
 );
 INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 (3,3333,123456789,123456789012345678,1234567890123456789012345
@@ -151,6 +159,7 @@ INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 ,UTL_RAW.CAST_TO_RAW('DVT'),UTL_RAW.CAST_TO_RAW('DVT DVT DVT')
 ,UTL_RAW.CAST_TO_RAW('DVT DVT DVT'),'DVT C','DVT C'
 ,HEXTORAW('387BDC3B218443B28EC23AC791C5B0F1')
+,'{"dvt": 345, "status": "ghi"}','{"dvt": 345, "status": "ghi"}'
 );
 COMMIT;
 

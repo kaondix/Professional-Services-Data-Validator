@@ -101,6 +101,8 @@ ORA2PG_COLUMNS = [
     "col_clob",
     "col_nclob",
     "col_uuid",
+    "col_json",
+    "col_jsonb",
 ]
 
 
@@ -375,8 +377,8 @@ def test_row_validation_oracle_to_postgres():
     # TODO col_raw/col_long_raw are blocked by issue-773 (is it even reasonable to expect binary columns to work here?)
     # TODO Change hash_cols below to include col_nvarchar_30,col_nchar_2 when issue-772 is complete.
     # TODO Change hash_cols below to include col_interval_ds when issue-1214 is complete.
+    # TODO Change hash_cols below to include col_clob/col_nclob/col_blob/col_json/col_jsonb when issue-1364 is complete.
     # Excluded col_float32,col_float64 due to the lossy nature of BINARY_FLOAT/DOUBLE.
-    # Excluded CLOB/NCLOB/BLOB columns because lob values cannot be concatenated
     hash_cols = ",".join(
         [
             _
@@ -394,6 +396,8 @@ def test_row_validation_oracle_to_postgres():
                 "col_nvarchar_30",
                 "col_nchar_2",
                 "col_interval_ds",
+                "col_json",
+                "col_jsonb",
             )
         ]
     )
@@ -593,8 +597,8 @@ def test_custom_query_row_validation_oracle_to_postgres():
     # TODO col_raw/col_long_raw are blocked by issue-773 (is it even reasonable to expect binary columns to work here?)
     # TODO Change hash_cols below to include col_nvarchar_30,col_nchar_2 when issue-772 is complete.
     # TODO Change hash_cols below to include col_interval_ds when issue-1214 is complete.
+    # TODO Change hash_cols below to include col_clob/col_nclob/col_blob/col_json/col_jsonb when issue-1364 is complete.
     # Excluded col_float32,col_float64 due to the lossy nature of BINARY_FLOAT/DOUBLE.
-    # Excluded CLOB/NCLOB/BLOB columns because lob values cannot be concatenated
     hash_cols = ",".join(
         [
             _
@@ -612,6 +616,8 @@ def test_custom_query_row_validation_oracle_to_postgres():
                 "col_nvarchar_30",
                 "col_nchar_2",
                 "col_interval_ds",
+                "col_json",
+                "col_jsonb",
             )
         ]
     )

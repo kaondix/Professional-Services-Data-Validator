@@ -80,6 +80,8 @@ CREATE TABLE pso_data_validator.dvt_ora2pg_types
 ,   col_clob        text
 ,   col_nclob       text
 ,   col_uuid        uuid
+,   col_json        json
+,   col_jsonb       jsonb
 );
 COMMENT ON TABLE pso_data_validator.dvt_ora2pg_types IS 'Oracle to PostgreSQL integration test table';
 
@@ -96,7 +98,8 @@ INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 ,INTERVAL '1 2:03:44.0' DAY TO SECOND(3)
 ,CAST('DVT' AS BYTEA),CAST('DVT' AS BYTEA)
 ,CAST('DVT' AS BYTEA),'DVT A','DVT A'
-,uuid('187bdc3b218443b28ec23ac791c5b0f1'))
+,uuid('187bdc3b218443b28ec23ac791c5b0f1')
+,'{"dvt": 123, "status": "abc"}','{"dvt": 123, "status": "abc"}')
 ,(2,2222,123456789,123456789012345678,1234567890123456789012345
 ,123.12,123.11
 --,123400,0.002
@@ -108,7 +111,8 @@ INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 ,INTERVAL '2 3:04:55.666' DAY TO SECOND(3)
 ,CAST('DVT' AS BYTEA),CAST('DVT DVT' AS BYTEA)
 ,CAST('DVT DVT' AS BYTEA),'DVT B','DVT B'
-,uuid('287bdc3b218443b28ec23ac791c5b0f1'))
+,uuid('287bdc3b218443b28ec23ac791c5b0f1')
+,'{"dvt": 234, "status": "def"}','{"dvt": 234, "status": "def"}')
 ,(3,3333,123456789,123456789012345678,1234567890123456789012345
 ,123.123,123.11
 --,123400,0.003
@@ -121,6 +125,7 @@ INSERT INTO pso_data_validator.dvt_ora2pg_types VALUES
 ,CAST('DVT' AS BYTEA),CAST('DVT DVT DVT' AS BYTEA)
 ,CAST('DVT DVT DVT' AS BYTEA),'DVT C','DVT C'
 ,uuid('387bdc3b218443b28ec23ac791c5b0f1')
+,'{"dvt": 345, "status": "ghi"}','{"dvt": 345, "status": "ghi"}'
 );
 
  /* Following table used for validating generating table partitions */
