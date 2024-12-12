@@ -603,7 +603,7 @@ CREATE TABLE `pso_data_validator`.`dvt_bool`
 INSERT INTO `pso_data_validator`.`dvt_bool` VALUES (1,true,true,true,true);
 INSERT INTO `pso_data_validator`.`dvt_bool` VALUES (2,false,false,false,false);
 
--- BigQuery stores UUIDs in STRINGs, see GENERATE_UUID().
+-- BigQuery stores UUIDs in STRING data type according to its utility function called GENERATE_UUID().
 DROP TABLE `pso_data_validator`.`dvt_uuid_id`;
 CREATE TABLE `pso_data_validator`.`dvt_uuid_id`
 (   id        STRING NOT NULL
