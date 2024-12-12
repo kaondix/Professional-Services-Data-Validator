@@ -2,6 +2,27 @@
 
 ## Untagged
 
+## [6.5.0](https://github.com/GoogleCloudPlatform/professional-services-data-validator/compare/v6.4.0...v6.5.0) (2024-12-12)
+
+
+### Features
+
+* Auto populate -pks when not provided by user ([#1324](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1324)) ([6119c18](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/6119c180e54ff383032d46d3222285ed640aa05b))
+* Prevent column validation exceptions caused by Oracle CLOB JSON columns ([#1365](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1365)) ([b20b4dd](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/b20b4dd5aa8aa8157ed5a24a33e9be193a65a62b))
+* Support customer defined api endpoint for BigQuery and Spanner ([#1340](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1340)) ([c88e752](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/c88e752cb7380b5a533f7e083ea350d7cd79bf87))
+
+
+### Bug Fixes
+
+* 1261 pg custom query without creating view ([#1353](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1353)) ([f25fe80](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/f25fe8021ca431d2dfbdff56de688cdab90c09a8))
+* catch InvalidArg when checking maybe_secret ([#1332](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1332)) ([2924202](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/292420241b3670807520708378b8d079c5b9163c))
+* Fix issue where long rows were being truncated in raw query command ([#1362](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1362)) ([97cfdbd](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/97cfdbd53da3d8f941f00793d7095767b61fd3a1))
+
+
+### Documentation
+
+* Refine connection secret support section ([#1358](https://github.com/GoogleCloudPlatform/professional-services-data-validator/issues/1358)) ([78c79ef](https://github.com/GoogleCloudPlatform/professional-services-data-validator/commit/78c79ef7fad14db9140a145bde9689eabd480731))
+
 ## [6.4.0](https://github.com/GoogleCloudPlatform/professional-services-data-validator/compare/v6.3.0...v6.4.0) (2024-11-12)
 
 
