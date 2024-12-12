@@ -22,8 +22,23 @@ from data_validation import consts
 
 
 def _uuid_string_cast(self):
-    """When casting UUIDs to string we strip out hyphens to enable us to match UUIDs stored in binary columns."""
-    return ops.Cast(self, to="string").to_expr().replace("-", "").lower()
+    """Cast UUIDs to a standard format string. For UUIDs stored in binary columns we need to inject hyphens."""
+    expr = ops.Cast(self, to="string").to_expr().lower()
+    if isinstance(self.type(), dt.Binary):
+        # Inject hyphens into the hex string. As far as we know only Oracle UUIDs will follow this path.
+        return (
+            expr.substr(0, 8)
+            .concat("-")
+            .concat(expr.substr(8, 4))
+            .concat("-")
+            .concat(expr.substr(12, 4))
+            .concat("-")
+            .concat(expr.substr(16, 4))
+            .concat("-")
+            .concat(expr.substr(20, 12))
+        )
+    else:
+        return expr
 
 
 def cast(self, target_type: dt.DataType) -> Value:
