@@ -615,7 +615,7 @@ class ConfigManager(object):
     def _comp_field_cast(
         self, source_table_schema: dict, target_table_schema: dict, field: str
     ) -> str:
-        # We check with .get() below because sometimes field is a computed name
+        # We check below if the field exists because sometimes it is a computed name
         # like "concat__all" which is not in the real table.
         source_type = (
             source_table_schema[field] if field in source_table_schema else None
