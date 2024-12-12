@@ -790,10 +790,10 @@ class ConfigManager(object):
             pre_calculated_config = self.build_and_append_pre_agg_calc_config(
                 source_column,
                 target_column,
-                "cast",
+                consts.CONFIG_CAST,
                 column_position,
-                "string",
-                depth,
+                cast_type="string",
+                depth=depth,
             )
             source_column = target_column = pre_calculated_config[
                 consts.CONFIG_FIELD_ALIAS
