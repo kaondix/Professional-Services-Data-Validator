@@ -235,8 +235,12 @@ def list_schemas(client):
 
 def list_tables(client, schema_name, tables_only=True):
     """Return a list of tables in the DB schema."""
-    fn = client.dvt_list_tables if tables_only else client.list_tables
-    if client.name in ["db2", "mssql", "redshift", "snowflake"]:
+    fn = (
+        client.dvt_list_tables
+        if tables_only and client.name != "pandas"
+        else client.list_tables
+    )
+    if client.name in ["db2", "mssql", "redshift", "snowflake", "pandas"]:
         return fn()
     return fn(database=schema_name)
 
