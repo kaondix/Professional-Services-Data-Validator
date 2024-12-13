@@ -23,9 +23,12 @@ from data_validation import consts
 
 def _uuid_string_cast(self):
     """Cast UUIDs to a standard format string. For UUIDs stored in binary columns we need to inject hyphens."""
-    expr = ops.Cast(self, to="string").to_expr().lower()
+    expr = ops.Cast(self, to="string").to_expr()
     if isinstance(self.type(), dt.Binary):
         # Inject hyphens into the hex string. As far as we know only Oracle UUIDs will follow this path.
+        # I tried to use Ibis join() but couldn't get sensible SQL out of it, example:
+        #   ibis.literal("-").join([expr.substr(0, 8), expr.substr(8, 4), ...])
+        # So I had to resort to the less ideal expression below.
         return (
             expr.substr(0, 8)
             .concat("-")
