@@ -41,7 +41,7 @@ def _uuid_string_cast(self):
             .concat(expr.substr(20, 12))
         )
     else:
-        return expr
+        return expr.lower()
 
 
 def cast(self, target_type: dt.DataType) -> Value:
